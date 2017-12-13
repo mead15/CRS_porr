@@ -1,0 +1,62 @@
+# depslib dependency file v1.0
+1513173110 source:c:\users\johra\desktop\porr\projekt\porr-etap1\porr\main.cpp
+	<iostream>
+	<cstdlib>
+	<ctime>
+	"include/algorithm.h"
+	"include/exercises.h"
+
+1511787848 c:\users\johra\desktop\porr\projekt\porr-etap1\porr\algorithms.h
+
+1513074933 c:\users\johra\desktop\porr\projekt\porr-etap1\porr\include\exercises.h
+	<cstdlib>
+	<ctime>
+	<iostream>
+	<vector>
+	<algorithm>
+
+1512512565 source:c:\users\johra\desktop\porr\projekt\porr-etap1\porr\src\algorithms.cpp
+	<iostream>
+	<cstdlib>
+	<ctime>
+	"../include/algorithms.h"
+
+1511786752 source:c:\users\johra\desktop\porr\projekt\porr-etap1\porr\src\crs2.cpp
+	"CRS2.h"
+
+1511786641 c:\users\johra\desktop\porr\projekt\porr-etap1\porr\include\crs2.h
+
+1513173097 source:c:\users\johra\desktop\porr\projekt\porr-etap1\porr\src\exercises.cpp
+	"../include/exercises.h"
+	<cmath>
+
+1512556149 c:\users\johra\desktop\porr\projekt\porr-etap1\porr\include\algorithms.h
+	<iostream>
+	<cstdlib>
+	<ctime>
+
+1512556149 source:c:\users\johra\desktop\porr\projekt\porr-etap1\porr\include\algorithms.h
+	<iostream>
+	<cstdlib>
+	<ctime>
+
+1513074933 source:c:\users\johra\desktop\porr\projekt\porr-etap1\porr\include\exercises.h
+	<cstdlib>
+	<ctime>
+	<iostream>
+	<vector>
+	<algorithm>
+
+1513173097 c:\users\johra\desktop\porr\projekt\porr-etap1\porr\include\algorithm.h
+	<iostream>
+	<iomanip>
+	<cstdlib>
+	<ctime>
+	<algorithm>
+	<utility>
+	<vector>
+	"exercises.h"
+
+1513173097 source:c:\users\johra\desktop\porr\projekt\porr-etap1\porr\src\algorithm.cpp
+	"../include/algorithm.h"
+
