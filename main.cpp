@@ -9,7 +9,7 @@ using namespace std;
 int main()
 {
     cout << "Hello world!" << endl;
-    int n_array[5] = {2, 10, 20, 50, 100};
+    int n_array[1] = {2};//, 10, 20, 50, 100};
     srand (time(NULL));
 
     std::cout << "CRS2" << std::endl;

@@ -60,3 +60,41 @@
 1513173097 source:c:\users\johra\desktop\porr\projekt\porr-etap1\porr\src\algorithm.cpp
 	"../include/algorithm.h"
 
+1513074933 source:c:\users\johra\documents\github\crs_porr1\include\exercises.h
+	<cstdlib>
+	<ctime>
+	<iostream>
+	<vector>
+	<algorithm>
+
+1513173110 source:c:\users\johra\documents\github\crs_porr1\main.cpp
+	<iostream>
+	<cstdlib>
+	<ctime>
+	"include/algorithm.h"
+	"include/exercises.h"
+
+1513173097 c:\users\johra\documents\github\crs_porr1\include\algorithm.h
+	<iostream>
+	<iomanip>
+	<cstdlib>
+	<ctime>
+	<algorithm>
+	<utility>
+	<vector>
+	"exercises.h"
+
+1513074933 c:\users\johra\documents\github\crs_porr1\include\exercises.h
+	<cstdlib>
+	<ctime>
+	<iostream>
+	<vector>
+	<algorithm>
+
+1513173151 source:c:\users\johra\documents\github\crs_porr1\src\algorithm.cpp
+	"../include/algorithm.h"
+
+1513173097 source:c:\users\johra\documents\github\crs_porr1\src\exercises.cpp
+	"../include/exercises.h"
+	<cmath>
+
