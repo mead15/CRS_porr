@@ -7,10 +7,10 @@
 #include <vector>
 #include <algorithm>
 
-class exercise{
+class Exercise{
     public:
-        exercise(int n);
-        virtual ~exercise();
+        Exercise(int n);
+        virtual ~Exercise();
         static constexpr double min_x = -40;
         static constexpr double max_x = 40;
         virtual bool checkConstraints(std::vector<double> x)=0;
@@ -20,17 +20,17 @@ class exercise{
         int n;
 };
 
-class f1: public exercise{
+class Func_1: public Exercise{
     public:
-        f1(int n):exercise(n){}
+        Func_1(int n):Exercise(n){}
         double calculate(std::vector<double> x);
         bool checkConstraints(std::vector<double> x);
         std::vector<double> generatePoint();
 };
 
-class f2: public exercise{
+class Func_2: public Exercise{
     public:
-        f2(int n):exercise(n){}
+        Func_2(int n):Exercise(n){}
         double calculate(std::vector<double> x);
         bool checkConstraints(std::vector<double> x);
         std::vector<double> generatePoint();

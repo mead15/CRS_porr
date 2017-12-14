@@ -2,14 +2,14 @@
 #include <cmath>
 
 
-exercise::exercise(int n){
+Exercise::Exercise(int n){
     this->n = n;
 }
 
-exercise::~exercise() {
+Exercise::~Exercise() {
 }
 
-double f1::calculate(std::vector<double> x)
+double Func_1::calculate(std::vector<double> x)
 {
 	double sum = 0.0;
 	double product = 1.0;
@@ -22,7 +22,7 @@ double f1::calculate(std::vector<double> x)
  	return result;
 }
 
-bool f1::checkConstraints(std::vector<double> x){
+bool Func_1::checkConstraints(std::vector<double> x){
     bool satisfied = true;
     for(int i=0; i<n; i++){
         satisfied = (x.at(i) >= -40) && (x.at(i) <= 40);
@@ -32,7 +32,7 @@ bool f1::checkConstraints(std::vector<double> x){
     return satisfied;
 }
 
-std::vector<double> f1::generatePoint(){
+std::vector<double> Func_1::generatePoint(){
     bool correct_point = true;
     std::vector<double> newPoint;
     do{
@@ -47,7 +47,7 @@ std::vector<double> f1::generatePoint(){
     return newPoint;
 }
 
-double f2::calculate(std::vector<double> x)
+double Func_2::calculate(std::vector<double> x)
 {
 	double sum = 0.0;
 	for (int i = 0; i < n-1; i++)
@@ -58,7 +58,7 @@ double f2::calculate(std::vector<double> x)
  	return result;
 }
 
-bool f2::checkConstraints(std::vector<double> x){
+bool Func_2::checkConstraints(std::vector<double> x){
     bool satisfied = true, cond1 = true, cond2 = true;
     double sum= 0.0;
     for(int i=0; i<n; i++){
@@ -72,7 +72,7 @@ bool f2::checkConstraints(std::vector<double> x){
     return satisfied;
 }
 
-std::vector<double> f2::generatePoint(){
+std::vector<double> Func_2::generatePoint(){
     bool correct_point = true;
     std::vector<double> newPoint;
     double max_value=max_x, min_value=min_x;
@@ -90,7 +90,7 @@ std::vector<double> f2::generatePoint(){
     return newPoint;
 }
 
-double f2::findMax(int i){
+double Func_2::findMax(int i){
     double maxCons2 = sqrt(n*10) + i;
     if(maxCons2<max_x)
         return maxCons2;
@@ -98,7 +98,7 @@ double f2::findMax(int i){
         return max_x;
 }
 
-double f2::findMin(int i){
+double Func_2::findMin(int i){
     double minCons2 = -sqrt(n*10) + i;
     if(minCons2<min_x)
         return min_x;

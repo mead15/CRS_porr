@@ -11,13 +11,13 @@
 #include "exercises.h"
 
 
-class algorithm
+class Algorithm
 {
     public:
-        algorithm(int n);
-        virtual ~algorithm();
-        void runCRS2(exercise* f);
-        void runCRS3(exercise* f);
+        Algorithm(int n);
+        virtual ~Algorithm();
+        void runCRS2(Exercise* f);
+        void runCRS3(Exercise* f);
 
     protected:
 
@@ -26,9 +26,11 @@ class algorithm
         double L_f, H_f;
         std::vector<double> L, H;
         bool CRS3 = false;
+        bool stop_criterion();
         std::vector<std::pair<std::vector<double>, double> > sampleSet;
-        exercise* f;
+        Exercise* f;
         std::vector<std::vector<double> > simplex;
+        std::vector<std::pair<std::vector<double>, double> > simplex_CRS3;
         void initializeSampleSet();
         void updateLH();
         void loc();
