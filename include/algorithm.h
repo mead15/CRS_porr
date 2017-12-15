@@ -10,7 +10,7 @@
 #include <vector>
 #include "exercises.h"
 
-
+using namespace std;
 class Algorithm
 {
     public:
@@ -24,20 +24,20 @@ class Algorithm
     private:
         int n, N;
         double L_f, H_f;
-        std::vector<double> L, H;
+        vector<double> L, H;
         bool CRS3 = false;
         bool stop_criterion();
-        std::vector<std::pair<std::vector<double>, double> > sampleSet;
+        vector<pair<vector<double>, double> > sampleSet;
         Exercise* f;
-        std::vector<std::vector<double> > simplex;
-        std::vector<std::pair<std::vector<double>, double> > simplex_CRS3;
+        vector<vector<double> > simplex;
+        vector<pair<vector<double>, double> > simplex_CRS3;
         void initializeSampleSet();
         void updateLH();
         void loc();
-        void sortSet(std::vector<std::pair<std::vector<double>, double> >& setToSort);
-        void setSimplex();
-        void getNewTrialPoint();
-        void printArray(std::vector<std::pair<std::vector<double>, double> >& a);
+        void sortSet(vector<pair<vector<double>, double> >& setToSort);
+        vector<vector<double>> generateSimplex();
+        pair<vector<double>, double> getNewTrialPoint(vector<pair<vector<double>, double> > localSampleSet);
+        void printArray(vector<pair<vector<double>, double> >& a);
 };
 
 #endif // ALGORITHM_H

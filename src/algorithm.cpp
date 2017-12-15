@@ -1,5 +1,7 @@
 #include "../include/algorithm.h"
+#include "../include/constants.h"
 #include <chrono>
+using namespace std;
 
 Algorithm::Algorithm(int n)
 {
@@ -22,16 +24,28 @@ void Algorithm::runCRS2(Exercise* f)
     sortSet(sampleSet);
     updateLH();
     printArray(sampleSet);
-    do{
-        getNewTrialPoint();
-        counter++;
+    do {
+        vector<pair<vector<double>, double>> candidates;
+        #pragma omp parallel num_threads(Constants::NUMBER_OF_THREADS) shared(candidates)
+        {
+            candidates.push_back(getNewTrialPoint(sampleSet));
+            cout << "a" << endl;
+
+        }
+        cout << "b" << endl;
+        sampleSet.insert(sampleSet.end(), candidates.begin(), candidates.end());
+        sortSet(sampleSet);
+        sampleSet.resize(N);
         updateLH();
+        cout << "c" << endl;
+
     }
     while(!stop_criterion());
-    std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+    cout << "Liczba krokow: ";
+    high_resolution_clock::time_point end = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>( end - start ).count()/ 1000;
     printArray(sampleSet);
-    std::cout << "Liczba krokow: " << counter << std::endl << "Czas trwania: " << duration << "ms" << std::endl;
+    cout << "Liczba krokow: " << counter << endl << "Czas trwania: " << duration << "ms" << endl;
 }
 
 void Algorithm::runCRS3(Exercise* f)
@@ -46,21 +60,20 @@ bool Algorithm::stop_criterion(){
 
 void Algorithm::initializeSampleSet(){
     sampleSet.clear();
-    std::vector<double> point;
+    vector<double> point;
     for(int i=0; i<N; i++){
         point = f->generatePoint();
         double value = f->calculate(point);
-        sampleSet.push_back(std::make_pair(point, value));
-        std::cout << i+1 << std::endl;
+        sampleSet.push_back(make_pair(point, value));
     }
 }
 
-void Algorithm::sortSet(std::vector<std::pair<std::vector<double>, double> >& setToSort){
+void Algorithm::sortSet(vector<pair<vector<double>, double> >& setToSort){
     int changes = 0;
-    std::pair<std::vector<double>, double> smaller;
+    pair<vector<double>, double> smaller;
     do{
         changes = 0;
-        int len = setToSort.size();
+        unsigned long long int len = setToSort.size();
         for (int i=0; i<len-1; i++) {
             if(setToSort.at(i).second > setToSort.at(i+1).second){
                 smaller = setToSort.at(i+1);
@@ -80,9 +93,9 @@ void Algorithm::updateLH(){
     H_f = sampleSet.at(N-1).second;
 }
 
-void Algorithm::setSimplex(){
-    simplex.clear();
-    std::vector<int> simplex_indexes;
+vector<vector<double>> Algorithm::generateSimplex(){
+    vector<vector<double> > simplex;
+    vector<int> simplex_indexes;
     for(int i = 0; i<n; i++){
         int newIndex;
         bool nodups = false;
@@ -102,11 +115,12 @@ void Algorithm::setSimplex(){
     for(int i=1; i<n+1; i++){
         simplex.push_back(sampleSet.at(simplex_indexes.at(i-1)).first);
     }
+    return simplex;
 }
 
-void Algorithm::getNewTrialPoint(){
-    setSimplex();
-    std::vector<double> centroid, newTrial, sum;
+pair<vector<double>, double> Algorithm::getNewTrialPoint(vector<pair<vector<double>, double> > sampleSet){
+    vector<vector<double> > simplex = generateSimplex();
+    vector<double> centroid, newTrial, sum;
     for(int i=0; i<n; i++)
         sum.push_back(0.0);
     double newTrialValue = 0.0;
@@ -119,13 +133,16 @@ void Algorithm::getNewTrialPoint(){
     newTrialValue = f->calculate(newTrial);
 
     if(!f->checkConstraints(newTrial) || newTrialValue>H_f){
-        newTrial.clear();
-        getNewTrialPoint();
+        return getNewTrialPoint(sampleSet);
     }
     else{
-        sampleSet.at(N-1).first = newTrial;
-        sampleSet.at(N-1).second = newTrialValue;
-        sortSet(sampleSet);
+        pair<vector<double>, double> para;
+        para.first = newTrial;
+        para.second = newTrialValue;
+        return para;
+//        sampleSet.at(N-1).first = newTrial;
+//        sampleSet.at(N-1).second = newTrialValue;
+//        sortSet(sampleSet);
         if (CRS3){
             int i = N/10;
             if(newTrialValue <= sampleSet.at(i-1).second){
@@ -136,7 +153,7 @@ void Algorithm::getNewTrialPoint(){
 }
 
 void Algorithm::loc(){
-    std::vector<double> W, G, S, P, Q, R, sum, newTrial;
+    vector<double> W, G, S, P, Q, R, sum, newTrial;
     double S_f, P_f, Q_f, R_f, newTrialValue;
 
     bool refreshSimplex, hasChanged=false;
@@ -235,21 +252,21 @@ void Algorithm::loc(){
     simplex_CRS3.clear();
 }
 
-void Algorithm::printArray(std::vector<std::pair<std::vector<double>, double> >& a){
+void Algorithm::printArray(vector<pair<vector<double>, double> >& a){
     int len = a.size();
 /*    if(n<50){
         for(int i=0; i<len; i++){
             for(int j=0; j<n; j++){
-                std::cout << std::setw(8) << a.at(i).first.at(j) << '\t';
+                cout << setw(8) << a.at(i).first.at(j) << '\t';
             }
-            std::cout << std::setw(12) << a.at(i).second;
-            std::cout << std::endl;
+            cout << setw(12) << a.at(i).second;
+            cout << endl;
         }
     }*/
-    std::cout << std::endl;
-    std::cout  << "x_min = [";
+    cout << endl;
+    cout  << "x_min = [";
     for(int i=0; i<n; i++)
-        std::cout << L.at(i) << ", ";
-    std::cout << "\b\b]" << '\t' << "f_min = " << L_f << std::endl;
-    std::cout << std::endl << "Różnica pomiędzy najlepszym i najgorszym  wynikiem w zbiorze P: " << H_f-L_f  << std::endl <<std::endl;
+        cout << L.at(i) << ", ";
+    cout << "\b\b]" << '\t' << "f_min = " << L_f << endl;
+    cout << endl << "Roznica pomiedzy najlepszym i najgorszym  wynikiem w zbiorze P: " << H_f-L_f  << endl <<endl;
 }

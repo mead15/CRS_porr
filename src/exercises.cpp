@@ -1,6 +1,7 @@
 #include "../include/exercises.h"
 #include <cmath>
 
+using namespace std;
 
 Exercise::Exercise(int n){
     this->n = n;
@@ -9,7 +10,7 @@ Exercise::Exercise(int n){
 Exercise::~Exercise() {
 }
 
-double Func_1::calculate(std::vector<double> x)
+double Func_1::calculate(vector<double> x)
 {
 	double sum = 0.0;
 	double product = 1.0;
@@ -22,7 +23,7 @@ double Func_1::calculate(std::vector<double> x)
  	return result;
 }
 
-bool Func_1::checkConstraints(std::vector<double> x){
+bool Func_1::checkConstraints(vector<double> x){
     bool satisfied = true;
     for(int i=0; i<n; i++){
         satisfied = (x.at(i) >= -40) && (x.at(i) <= 40);
@@ -32,9 +33,9 @@ bool Func_1::checkConstraints(std::vector<double> x){
     return satisfied;
 }
 
-std::vector<double> Func_1::generatePoint(){
+vector<double> Func_1::generatePoint(){
     bool correct_point = true;
-    std::vector<double> newPoint;
+    vector<double> newPoint;
     do{
         newPoint.clear();
         for(int i =0; i<n; i++){
@@ -47,7 +48,7 @@ std::vector<double> Func_1::generatePoint(){
     return newPoint;
 }
 
-double Func_2::calculate(std::vector<double> x)
+double Func_2::calculate(vector<double> x)
 {
 	double sum = 0.0;
 	for (int i = 0; i < n-1; i++)
@@ -58,7 +59,7 @@ double Func_2::calculate(std::vector<double> x)
  	return result;
 }
 
-bool Func_2::checkConstraints(std::vector<double> x){
+bool Func_2::checkConstraints(vector<double> x){
     bool satisfied = true, cond1 = true, cond2 = true;
     double sum= 0.0;
     for(int i=0; i<n; i++){
@@ -72,9 +73,9 @@ bool Func_2::checkConstraints(std::vector<double> x){
     return satisfied;
 }
 
-std::vector<double> Func_2::generatePoint(){
+vector<double> Func_2::generatePoint(){
     bool correct_point = true;
-    std::vector<double> newPoint;
+    vector<double> newPoint;
     double max_value, min_value, currentSum, newCoordinate;
     do{
         newPoint.clear();
