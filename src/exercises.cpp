@@ -52,7 +52,7 @@ double Func_2::calculate(std::vector<double> x)
 	double sum = 0.0;
 	for (int i = 0; i < n-1; i++)
 	{
-		sum += (100*pow((x.at(i+1) - x.at(i)*x.at(i)), 2.0) + pow((1-x.at(i)), 2.0));
+		sum += (100*pow((x.at(i+1) - (x.at(i)*x.at(i))), 2.0) + pow((1-x.at(i)), 2.0));
 	}
 	double result = sum;
  	return result;
@@ -75,14 +75,18 @@ bool Func_2::checkConstraints(std::vector<double> x){
 std::vector<double> Func_2::generatePoint(){
     bool correct_point = true;
     std::vector<double> newPoint;
-    double max_value=max_x, min_value=min_x;
+    double max_value, min_value, currentSum, newCoordinate;
     do{
         newPoint.clear();
-        for(int i =0; i<n; i++){
-            max_value = findMax(i+1);
-            min_value = findMin(i+1);
+        currentSum = 0.0;
+        for(int i = n; i>0; i--){
+            max_value = findMax(i, currentSum);
+            min_value = findMin(i, currentSum);
             double random = (double)rand() / RAND_MAX;
-            newPoint.push_back(min_value + random * (max_value - min_value));
+            newCoordinate = min_value + random * (max_value - min_value);
+            currentSum += pow((newCoordinate - i),2);
+            newPoint.insert(newPoint.begin(), newCoordinate);
+            //newPoint.push_back(newCoordinate);
         }
         correct_point = checkConstraints(newPoint);
     }
@@ -90,16 +94,16 @@ std::vector<double> Func_2::generatePoint(){
     return newPoint;
 }
 
-double Func_2::findMax(int i){
-    double maxCons2 = sqrt(n*10) + i;
+double Func_2::findMax(int i, double sum){
+    double maxCons2 = sqrt(n*10-sum) + i;
     if(maxCons2<max_x)
         return maxCons2;
     else
         return max_x;
 }
 
-double Func_2::findMin(int i){
-    double minCons2 = -sqrt(n*10) + i;
+double Func_2::findMin(int i, double sum){
+    double minCons2 = -sqrt(n*10-sum) + i;
     if(minCons2<min_x)
         return min_x;
     else

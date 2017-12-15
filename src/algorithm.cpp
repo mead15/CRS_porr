@@ -51,6 +51,7 @@ void Algorithm::initializeSampleSet(){
         point = f->generatePoint();
         double value = f->calculate(point);
         sampleSet.push_back(std::make_pair(point, value));
+        std::cout << i+1 << std::endl;
     }
 }
 
@@ -231,7 +232,6 @@ void Algorithm::loc(){
         for(int i=0; i<sim_size; i++)
             sampleSet.at(i)=simplex_CRS3.at(i);
     }
-    std::cout << std::endl << "**************** LOC ********************" << std::endl;
     simplex_CRS3.clear();
 }
 
@@ -247,7 +247,9 @@ void Algorithm::printArray(std::vector<std::pair<std::vector<double>, double> >&
         }
     }*/
     std::cout << std::endl;
+    std::cout  << "x_min = [";
     for(int i=0; i<n; i++)
-        std::cout  << L.at(i) << '\t';
-    std::cout << std::endl << H_f-L_f << '\t' << L_f << std::endl <<std::endl;
+        std::cout << L.at(i) << ", ";
+    std::cout << "\b\b]" << '\t' << "f_min = " << L_f << std::endl;
+    std::cout << std::endl << "Różnica pomiędzy najlepszym i najgorszym  wynikiem w zbiorze P: " << H_f-L_f  << std::endl <<std::endl;
 }
