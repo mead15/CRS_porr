@@ -1,6 +1,8 @@
 #include "../include/algorithm.h"
 #include "../include/constants.h"
 #include <chrono>
+#include <omp.h>
+
 using namespace std;
 
 Algorithm::Algorithm(int n)
@@ -25,19 +27,17 @@ void Algorithm::runCRS2(Exercise* f)
     updateLH();
     printArray(sampleSet);
     do {
-        vector<pair<vector<double>, double>> candidates;
+        vector<pair<vector<double>, double>> candidates(Constants::NUMBER_OF_THREADS);
         #pragma omp parallel num_threads(Constants::NUMBER_OF_THREADS) shared(candidates)
         {
-            candidates.push_back(getNewTrialPoint(sampleSet));
-            cout << "a" << endl;
+            long long tid = omp_get_thread_num();
+            candidates.at(tid) = getNewTrialPoint(sampleSet);
 
         }
-        cout << "b" << endl;
         sampleSet.insert(sampleSet.end(), candidates.begin(), candidates.end());
         sortSet(sampleSet);
         sampleSet.resize(N);
         updateLH();
-        cout << "c" << endl;
 
     }
     while(!stop_criterion());

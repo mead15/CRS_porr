@@ -6,7 +6,7 @@ using namespace std;
 
 int main()
 {
-    int n_array[1] = {2};//, 10, 20, 50, 100};
+    int n_array[1] = {10};//, 10, 20, 50, 100};
     srand (time(NULL));
 
     std::cout << "CRS2" << std::endl;
