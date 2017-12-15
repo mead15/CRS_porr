@@ -34,8 +34,8 @@ class Func_2: public Exercise{
         double calculate(std::vector<double> x);
         bool checkConstraints(std::vector<double> x);
         std::vector<double> generatePoint();
-        double findMax(int i);
-        double findMin(int i);
+        double findMax(int i, double sum);
+        double findMin(int i, double sum);
 };
 
 
