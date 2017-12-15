@@ -27,6 +27,9 @@ void Algorithm::runCRS2(Exercise* f)
     updateLH();
     printArray(sampleSet);
     do {
+        /* **********************************************************************
+         * PARALLEL
+         */
         vector<pair<vector<double>, double>> candidates(Constants::NUMBER_OF_THREADS);
         #pragma omp parallel num_threads(Constants::NUMBER_OF_THREADS) shared(candidates)
         {
@@ -38,7 +41,21 @@ void Algorithm::runCRS2(Exercise* f)
         sortSet(sampleSet);
         sampleSet.resize(N);
         updateLH();
+        /* ***********************************************************************
+         * END OF PARALLEL
+         */
 
+        /* **********************************************************************
+         * SEQUENCE
+         */
+//        pair<vector<double>, double> candidate = getNewTrialPoint(sampleSet);
+//        sampleSet.at(N-1).first = candidate.first;
+//        sampleSet.at(N-1).second = candidate.second;
+//        sortSet(sampleSet);
+//        updateLH();
+        /* ***********************************************************************
+         * END OF SEQUENCE
+         */
     }
     while(!stop_criterion());
     cout << "Liczba krokow: ";
