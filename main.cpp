@@ -1,7 +1,6 @@
 #include <iostream>
 #include <ctime>
 #include "include/algorithm.h"
-#include "include/exercises.h"
 
 using namespace std;
 
@@ -51,6 +50,6 @@ int main()
         delete CRS3_f2;
         delete f;
     }
-
+    
     return 0;
 }

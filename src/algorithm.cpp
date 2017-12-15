@@ -231,7 +231,6 @@ void Algorithm::loc(){
         for(int i=0; i<sim_size; i++)
             sampleSet.at(i)=simplex_CRS3.at(i);
     }
-    std::cout << std::endl << "**************** LOC ********************" << std::endl;
     simplex_CRS3.clear();
 }
 
