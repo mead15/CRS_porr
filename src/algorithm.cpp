@@ -26,21 +26,39 @@ void Algorithm::runCRS2(Exercise* f)
     sortSet(sampleSet);
     updateLH();
     printArray(sampleSet);
+    int i = N/10;
     do {
         /* **********************************************************************
-         * PARALLEL
+         * PARALLEL Ustawianie w pliku include/constants.h
          */
-        vector<pair<vector<double>, double>> candidates(Constants::NUMBER_OF_THREADS);
-        #pragma omp parallel num_threads(Constants::NUMBER_OF_THREADS) shared(candidates)
-        {
-            long long tid = omp_get_thread_num();
-            candidates.at(tid) = getNewTrialPoint(sampleSet);
+        if (Constants::PARALLEL) {
 
+            vector<pair<vector<double>, double>> candidates(Constants::NUMBER_OF_THREADS);
+            vector<pair<vector<double>, double>> crs3_loc_candidates(i * Constants::NUMBER_OF_THREADS);
+            #pragma omp parallel num_threads(Constants::NUMBER_OF_THREADS) shared(candidates)
+            {
+                long long tid = omp_get_thread_num();
+                pair<vector<double>, double> candidate = getNewTrialPoint(sampleSet);
+                candidates.at(tid).first = candidate.first;
+                candidates.at(tid).second = candidate.second;
+            }
+
+            sampleSet.insert(sampleSet.end(), candidates.begin(), candidates.end());
+            sortSet(sampleSet);
+            sampleSet.resize(N);
+            if (CRS3){
+
+                #pragma omp parallel for num_threads(Constants::NUMBER_OF_THREADS) shared(candidates, sampleSet)
+                for (int index = 0; index< candidates.size(); index++){
+                    if(candidates[index].second <= sampleSet.at(i-1).second){
+                        loc();
+                    }
+                }
+
+            }
+            updateLH();
+            counter+=Constants::NUMBER_OF_THREADS;
         }
-        sampleSet.insert(sampleSet.end(), candidates.begin(), candidates.end());
-        sortSet(sampleSet);
-        sampleSet.resize(N);
-        updateLH();
         /* ***********************************************************************
          * END OF PARALLEL
          */
@@ -48,17 +66,25 @@ void Algorithm::runCRS2(Exercise* f)
         /* **********************************************************************
          * SEQUENCE
          */
-//        pair<vector<double>, double> candidate = getNewTrialPoint(sampleSet);
-//        sampleSet.at(N-1).first = candidate.first;
-//        sampleSet.at(N-1).second = candidate.second;
-//        sortSet(sampleSet);
-//        updateLH();
+        else {
+
+            pair<vector<double>, double> candidate = getNewTrialPoint(sampleSet);
+            sampleSet.at(N - 1).first = candidate.first;
+            sampleSet.at(N - 1).second = candidate.second;
+            sortSet(sampleSet);
+            if (CRS3) {
+                if (candidate.second <= sampleSet.at(i - 1).second) {
+                    loc();
+                }
+            }
+            updateLH();
+            counter++;
+        }
         /* ***********************************************************************
          * END OF SEQUENCE
          */
     }
     while(!stop_criterion());
-    cout << "Liczba krokow: ";
     high_resolution_clock::time_point end = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>( end - start ).count()/ 1000;
     printArray(sampleSet);
@@ -157,22 +183,14 @@ pair<vector<double>, double> Algorithm::getNewTrialPoint(vector<pair<vector<doub
         para.first = newTrial;
         para.second = newTrialValue;
         return para;
-//        sampleSet.at(N-1).first = newTrial;
-//        sampleSet.at(N-1).second = newTrialValue;
-//        sortSet(sampleSet);
-        if (CRS3){
-            int i = N/10;
-            if(newTrialValue <= sampleSet.at(i-1).second){
-                loc();
-            }
-        }
+
     }
 }
 
 void Algorithm::loc(){
     vector<double> W, G, S, P, Q, R, sum, newTrial;
     double S_f, P_f, Q_f, R_f, newTrialValue;
-
+    vector<pair<vector<double>, double> > simplex_CRS3;
     bool refreshSimplex, hasChanged=false;
     int sim_size = N/10;
 
@@ -229,12 +247,6 @@ void Algorithm::loc(){
                         newTrialValue = Q_f;
                         refreshSimplex = true;
                     }
-                    else {
-                        //stop
-                    }
-                }
-                else {
-                    //stop
                 }
             }
         }
@@ -246,12 +258,6 @@ void Algorithm::loc(){
                     newTrialValue = Q_f;
                     refreshSimplex = true;
                 }
-                else {
-                    //stop
-                }
-            }
-            else {
-                //stop
             }
         }
         if(refreshSimplex) {
@@ -262,9 +268,11 @@ void Algorithm::loc(){
         }
     } while(refreshSimplex);
 
-    if(hasChanged){
-        for(int i=0; i<sim_size; i++)
-            sampleSet.at(i)=simplex_CRS3.at(i);
+    if(hasChanged) {
+        for (int i = 0; i < sim_size; i++) {
+            sampleSet.at(i).first = simplex_CRS3.at(i).first;
+            sampleSet.at(i).second = simplex_CRS3.at(i).second;
+        }
     }
     simplex_CRS3.clear();
 }

@@ -27,10 +27,9 @@ class Algorithm
         vector<double> L, H;
         bool CRS3 = false;
         bool stop_criterion();
-        vector<pair<vector<double>, double> > sampleSet;
+        vector<pair<vector<double>, double>> sampleSet;
         Exercise* f;
         vector<vector<double> > simplex;
-        vector<pair<vector<double>, double> > simplex_CRS3;
         void initializeSampleSet();
         void updateLH();
         void loc();
