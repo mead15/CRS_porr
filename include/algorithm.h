@@ -16,8 +16,8 @@ class Algorithm
     public:
         Algorithm(int n);
         virtual ~Algorithm();
-        void runCRS2(Exercise* f);
-        void runCRS3(Exercise* f);
+        void runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, int numOfThreads);
+        void runCRS3(Exercise* f, bool parallel, double epsilon, int numOfThreads);
 
     protected:
 
@@ -26,7 +26,7 @@ class Algorithm
         double L_f, H_f;
         vector<double> L, H;
         bool CRS3 = false;
-        bool stop_criterion();
+        bool stop_criterion(double i);
         vector<pair<vector<double>, double>> sampleSet;
         Exercise* f;
         vector<vector<double> > simplex;

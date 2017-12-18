@@ -16,7 +16,7 @@ Algorithm::~Algorithm()
 {
 }
 
-void Algorithm::runCRS2(Exercise* f)
+void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, int numOfThreads)
 {
     using namespace std::chrono;
     high_resolution_clock::time_point start = high_resolution_clock::now();
@@ -25,17 +25,16 @@ void Algorithm::runCRS2(Exercise* f)
     initializeSampleSet();
     sortSet(sampleSet);
     updateLH();
-    printArray(sampleSet);
     int i = N/10;
     do {
         /* **********************************************************************
          * PARALLEL Ustawianie w pliku include/constants.h
          */
-        if (Constants::PARALLEL) {
+        if (parallel) {
 
-            vector<pair<vector<double>, double>> candidates(Constants::NUMBER_OF_THREADS);
-            vector<pair<vector<double>, double>> crs3_loc_candidates(i * Constants::NUMBER_OF_THREADS);
-            #pragma omp parallel num_threads(Constants::NUMBER_OF_THREADS) shared(candidates)
+            vector<pair<vector<double>, double>> candidates(numOfThreads);
+            vector<pair<vector<double>, double>> crs3_loc_candidates(i * numOfThreads);
+            #pragma omp parallel num_threads(numOfThreads) shared(candidates)
             {
                 long long tid = omp_get_thread_num();
                 pair<vector<double>, double> candidate = getNewTrialPoint(sampleSet);
@@ -46,9 +45,9 @@ void Algorithm::runCRS2(Exercise* f)
             sampleSet.insert(sampleSet.end(), candidates.begin(), candidates.end());
             sortSet(sampleSet);
             sampleSet.resize(N);
-            if (CRS3){
+            if (crs3){
 
-                #pragma omp parallel for num_threads(Constants::NUMBER_OF_THREADS) shared(candidates, sampleSet)
+                #pragma omp parallel for num_threads(numOfThreads) shared(candidates, sampleSet)
                 for (int index = 0; index< candidates.size(); index++){
                     if(candidates[index].second <= sampleSet.at(i-1).second){
                         loc();
@@ -57,7 +56,7 @@ void Algorithm::runCRS2(Exercise* f)
 
             }
             updateLH();
-            counter+=Constants::NUMBER_OF_THREADS;
+            counter+=numOfThreads;
         }
         /* ***********************************************************************
          * END OF PARALLEL
@@ -72,7 +71,7 @@ void Algorithm::runCRS2(Exercise* f)
             sampleSet.at(N - 1).first = candidate.first;
             sampleSet.at(N - 1).second = candidate.second;
             sortSet(sampleSet);
-            if (CRS3) {
+            if (crs3) {
                 if (candidate.second <= sampleSet.at(i - 1).second) {
                     loc();
                 }
@@ -84,21 +83,22 @@ void Algorithm::runCRS2(Exercise* f)
          * END OF SEQUENCE
          */
     }
-    while(!stop_criterion());
+    while(!stop_criterion(epsilon));
     high_resolution_clock::time_point end = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>( end - start ).count()/ 1000;
     printArray(sampleSet);
     cout << "Liczba krokow: " << counter << endl << "Czas trwania: " << duration << "ms" << endl;
+    cout << "*********************************************************" << endl;
 }
 
-void Algorithm::runCRS3(Exercise* f)
+void Algorithm::runCRS3(Exercise* f, bool parallel, double epsilon, int numOfThreads)
 {
-    this->CRS3 = true;
-    runCRS2(f);
+//    this->CRS3 = true;
+    runCRS2(f, parallel, epsilon, true, numOfThreads);
 }
 
-bool Algorithm::stop_criterion(){
-    return( (H_f - L_f) < 1e-6);
+bool Algorithm::stop_criterion(double epsilon){
+    return( (H_f - L_f) < epsilon);
 }
 
 void Algorithm::initializeSampleSet(){
@@ -278,8 +278,8 @@ void Algorithm::loc(){
 }
 
 void Algorithm::printArray(vector<pair<vector<double>, double> >& a){
-    int len = a.size();
-/*    if(n<50){
+/*    int len = a.size();
+    if(n<50){
         for(int i=0; i<len; i++){
             for(int j=0; j<n; j++){
                 cout << setw(8) << a.at(i).first.at(j) << '\t';
@@ -288,10 +288,9 @@ void Algorithm::printArray(vector<pair<vector<double>, double> >& a){
             cout << endl;
         }
     }*/
-    cout << endl;
     cout  << "x_min = [";
     for(int i=0; i<n; i++)
         cout << L.at(i) << ", ";
     cout << "\b\b]" << '\t' << "f_min = " << L_f << endl;
-    cout << endl << "Roznica pomiedzy najlepszym i najgorszym  wynikiem w zbiorze P: " << H_f-L_f  << endl <<endl;
+    cout << "Roznica pomiedzy najlepszym i najgorszym  wynikiem w zbiorze P: " << H_f-L_f << endl;
 }
