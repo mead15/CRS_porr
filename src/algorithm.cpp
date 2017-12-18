@@ -1,5 +1,4 @@
 #include "../include/algorithm.h"
-#include "../include/constants.h"
 #include <chrono>
 #include <omp.h>
 
