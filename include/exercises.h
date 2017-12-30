@@ -15,9 +15,9 @@ class Exercise{
         virtual ~Exercise();
         static constexpr double min_x = -40;
         static constexpr double max_x = 40;
-        virtual bool checkConstraints(vector<double> x)=0;
+        bool checkConstraints(vector<double> x);
         virtual double calculate(vector<double> x)=0;
-        virtual vector<double> generatePoint() = 0;
+        vector<double> generatePoint();
     protected:
         int n;
 };
@@ -26,18 +26,12 @@ class Func_1: public Exercise{
     public:
         Func_1(int n):Exercise(n){}
         double calculate(vector<double> x);
-        bool checkConstraints(vector<double> x);
-        vector<double> generatePoint();
 };
 
 class Func_2: public Exercise{
     public:
         Func_2(int n):Exercise(n){}
         double calculate(vector<double> x);
-        bool checkConstraints(vector<double> x);
-        vector<double> generatePoint();
-        double findMax(int i, double sum);
-        double findMin(int i, double sum);
 };
 
 

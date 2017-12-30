@@ -46,7 +46,7 @@ void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, i
             sampleSet.resize(N);
             if (crs3){
 
-                #pragma omp parallel for num_threads(numOfThreads) shared(candidates, sampleSet)
+               // #pragma omp parallel for num_threads(numOfThreads) shared(candidates, sampleSet)
                 for (int index = 0; index< candidates.size(); index++){
                     if(candidates[index].second <= sampleSet.at(i-1).second){
                         loc();

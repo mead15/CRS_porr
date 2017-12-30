@@ -10,20 +10,7 @@ Exercise::Exercise(int n){
 Exercise::~Exercise() {
 }
 
-double Func_1::calculate(vector<double> x)
-{
-	double sum = 0.0;
-	double product = 1.0;
-	for (int i = 0; i < n; i++)
-	{
-		sum += x.at(i) * x.at(i);
-		product *= cos(x.at(i) / (i+1));
-	}
-	double result = sum / 40 + 1 - product;
- 	return result;
-}
-
-bool Func_1::checkConstraints(vector<double> x){
+bool Exercise::checkConstraints(vector<double> x){
     bool satisfied = true;
     for(int i=0; i<n; i++){
         satisfied = (x.at(i) >= -40) && (x.at(i) <= 40);
@@ -33,7 +20,7 @@ bool Func_1::checkConstraints(vector<double> x){
     return satisfied;
 }
 
-vector<double> Func_1::generatePoint(){
+vector<double> Exercise::generatePoint(){
     bool correct_point = true;
     vector<double> newPoint;
     do{
@@ -48,6 +35,19 @@ vector<double> Func_1::generatePoint(){
     return newPoint;
 }
 
+double Func_1::calculate(vector<double> x)
+{
+    double sum = 0.0;
+    double product = 1.0;
+    for (int i = 0; i < n; i++)
+    {
+        sum += x.at(i) * x.at(i);
+        product *= cos(x.at(i) / (i+1));
+    }
+    double result = sum / 40 + 1 - product;
+    return result;
+}
+
 double Func_2::calculate(vector<double> x)
 {
 	double sum = 0.0;
@@ -57,56 +57,4 @@ double Func_2::calculate(vector<double> x)
 	}
 	double result = sum;
  	return result;
-}
-
-bool Func_2::checkConstraints(vector<double> x){
-    bool satisfied = true, cond1 = true, cond2 = true;
-    double sum= 0.0;
-    for(int i=0; i<n; i++){
-        cond1 = (x.at(i) >= -40) && (x.at(i)<= 40);
-        sum += pow((x.at(i)-i+1),2);
-        cond2 = (sum <= 10*n);
-        if(!cond1 || !cond2)
-            break;
-    }
-    satisfied = cond1 && cond2;
-    return satisfied;
-}
-
-vector<double> Func_2::generatePoint(){
-    bool correct_point = true;
-    vector<double> newPoint;
-    double max_value, min_value, currentSum, newCoordinate;
-    do{
-        newPoint.clear();
-        currentSum = 0.0;
-        for(int i = n; i>0; i--){
-            max_value = findMax(i, currentSum);
-            min_value = findMin(i, currentSum);
-            double random = (double)rand() / RAND_MAX;
-            newCoordinate = min_value + random * (max_value - min_value);
-            currentSum += pow((newCoordinate - i),2);
-            newPoint.insert(newPoint.begin(), newCoordinate);
-            //newPoint.push_back(newCoordinate);
-        }
-        correct_point = checkConstraints(newPoint);
-    }
-    while(!correct_point);
-    return newPoint;
-}
-
-double Func_2::findMax(int i, double sum){
-    double maxCons2 = sqrt(n*10-sum) + i;
-    if(maxCons2<max_x)
-        return maxCons2;
-    else
-        return max_x;
-}
-
-double Func_2::findMin(int i, double sum){
-    double minCons2 = -sqrt(n*10-sum) + i;
-    if(minCons2<min_x)
-        return min_x;
-    else
-        return minCons2;
 }
