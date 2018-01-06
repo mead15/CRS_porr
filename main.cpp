@@ -5,7 +5,7 @@
 using namespace std;
 
 static const int NUMBER_OF_THREADS[5] = {2, 4, 8, 16, 32};
-static const int N_ARRAY[4] = {2, 10, 20,50};
+static const int N_ARRAY[5] = {2, 10, 20, 50, 100};
 static const double EPSILON[4] = {1e-2, 1e-4, 1e-6, 1e-8};
 
 int main()
