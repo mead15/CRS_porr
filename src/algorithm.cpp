@@ -1,18 +1,22 @@
 #include "../include/algorithm.h"
 #include <chrono>
+#include <fstream>
 #include <omp.h>
 
 using namespace std;
+
+ofstream myfile;
 
 Algorithm::Algorithm(int n)
 {
     this->n = n;
     this->N = 10*(n+1);
-
+    myfile.open ("results1.log", ios::app);
 }
 
 Algorithm::~Algorithm()
 {
+    myfile.close();
 }
 
 void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, int numOfThreads)
@@ -86,8 +90,8 @@ void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, i
     high_resolution_clock::time_point end = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>( end - start ).count()/ 1000;
     printArray(sampleSet);
-    cout << "Liczba krokow: " << counter << endl << "Czas trwania: " << duration << "ms" << endl;
-    cout << "*********************************************************" << endl;
+    myfile << "Liczba krokow: " << counter << endl << "Czas trwania: " << duration << "ms" << endl;
+    myfile << "*********************************************************" << endl;
 }
 
 void Algorithm::runCRS3(Exercise* f, bool parallel, double epsilon, int numOfThreads)
@@ -287,9 +291,9 @@ void Algorithm::printArray(vector<pair<vector<double>, double> >& a){
             cout << endl;
         }
     }*/
-    cout  << "x_min = [";
+    myfile  << "x_min = [";
     for(int i=0; i<n; i++)
-        cout << L.at(i) << ", ";
-    cout << "\b\b]" << '\t' << "f_min = " << L_f << endl;
-    cout << "Roznica pomiedzy najlepszym i najgorszym  wynikiem w zbiorze P: " << H_f-L_f << endl;
+        myfile << L.at(i) << ", ";
+    myfile << "\b\b]" << '\t' << "f_min = " << L_f << endl;
+    myfile << "Roznica pomiedzy najlepszym i najgorszym  wynikiem w zbiorze P: " << H_f-L_f << endl;
 }
