@@ -1,6 +1,5 @@
 #include "../include/algorithm.h"
 #include <chrono>
-#include <omp.h>
 
 using namespace std;
 
@@ -35,10 +34,7 @@ void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, i
             vector<pair<vector<double>, double>> crs3_loc_candidates(i * numOfThreads);
             #pragma omp parallel num_threads(numOfThreads) shared(candidates)
             {
-                long long tid = omp_get_thread_num();
                 pair<vector<double>, double> candidate = getNewTrialPoint(sampleSet);
-                candidates.at(tid).first = candidate.first;
-                candidates.at(tid).second = candidate.second;
             }
 
             sampleSet.insert(sampleSet.end(), candidates.begin(), candidates.end());
