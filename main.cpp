@@ -8,6 +8,17 @@ using namespace std;
 static const int N_ARRAY[5] = {2, 10, 20, 50, 100};
 static const double EPSILON[4] = {1e-2, 1e-4, 1e-6, 1e-8};
 
+
+double **alloc_2d(int rows, int cols) {
+    double *data = (double *)malloc(rows*cols*sizeof(double));
+    double **array= (double **)malloc(rows*sizeof(double*));
+    for (int i=0; i<rows; i++)
+        array[i] = &(data[cols*i]);
+
+    return array;
+}
+
+
 int main(int argc, char** argv)
 {
     srand (time(NULL));
@@ -35,9 +46,16 @@ int main(int argc, char** argv)
                 std::cout << "Liczba watkow: " << threadNum << endl;
                 std::cout << "n = " << n << std::endl;
                 {
+                    std::cout << "a1" << std::endl;
                     Algorithm *CRS2_f1 = new Algorithm(n);
+                    std::cout << "a2" << std::endl;
+
                     Exercise *f = new Func_1(n);
+                    std::cout << "a3" << std::endl;
+
                     CRS2_f1->runCRS2(f, true, epsilon, false, threadNum);
+                    std::cout << "a4" << std::endl;
+
                     delete CRS2_f1;
                     delete f;
                 }
@@ -89,8 +107,9 @@ int main(int argc, char** argv)
             }
         } else {
             while (1) {
-                double **sampleSet;
-                MPI_Recv(&sampleSet[0][0], 10*(n+1)*(n+1), MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                double **sampleSet = alloc_2d(10*(n+1), n+1);
+                std::cout << "adasdadada";
+//                MPI_Recv(&sampleSet[0][0], 10*(n+1)*(n+1), MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                 if(sampleSet[0][0]==0){
                     break;
                 }

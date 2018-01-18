@@ -17,13 +17,19 @@ Algorithm::~Algorithm()
 
 void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, int numOfThreads)
 {
+    cout<<"1";
     using namespace std::chrono;
     high_resolution_clock::time_point start = high_resolution_clock::now();
+    std::cout<<"2";
     this->f = f;
     int counter = 0;
+    std::cout<<"3";
     initializeSampleSet();
+    std::cout<<"4";
     sortSet(sampleSet);
+    std::cout<<"5";
     updateLH();
+    std::cout<<"1";
     int i = N/10;
     do {
         /* **********************************************************************
@@ -35,7 +41,8 @@ void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, i
             MPI_Comm_size(MPI_COMM_WORLD, &world_size);
             int threadsNum = world_size-1;
             vector<pair<vector<double>, double>> candidates(threadsNum);
-            for (int z=1; z<world_size; z++){
+            for (int z=1; z< world_size; z++){
+                std::cout << "TESTEES" << &getSampleSet()[0][0];
                 MPI_Send(&getSampleSet()[0][0] ,N*(n+1), MPI_DOUBLE, z, 0, MPI_COMM_WORLD);
             }
             for(int z=1; z< world_size; z++) {
