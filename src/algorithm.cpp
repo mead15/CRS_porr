@@ -1,5 +1,6 @@
 #include "../include/algorithm.h"
 #include <chrono>
+#include <mpi.h>
 
 using namespace std;
 
@@ -29,12 +30,27 @@ void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, i
          * PARALLEL Ustawianie w pliku include/constants.h
          */
         if (parallel) {
+            int received = 0;
+            int world_size;
+            MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+            int threadsNum = world_size-1;
+            vector<pair<vector<double>, double>> candidates(threadsNum);
+            for (int z=1; z<world_size; z++){
+                MPI_Send(&getSampleSet()[0][0] ,N*(n+1), MPI_DOUBLE, z, 0, MPI_COMM_WORLD);
+            }
+            for(int z=1; z< world_size; z++) {
+                double *candidate;
+                MPI_Recv(&candidate, (n + 1), MPI_DOUBLE, z, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                pair<vector<double>, double> newCandidate;
+                newCandidate.second = candidate[0];
+                for (int i = 0; i < n; i++) {
+                    newCandidate.first.at(i) = candidate[i + 1];
+                }
+                candidates.at(z - 1) = newCandidate;
+                received++;
+            }
+            while(received < threadsNum){
 
-            vector<pair<vector<double>, double>> candidates(numOfThreads);
-            vector<pair<vector<double>, double>> crs3_loc_candidates(i * numOfThreads);
-            #pragma omp parallel num_threads(numOfThreads) shared(candidates)
-            {
-                pair<vector<double>, double> candidate = getNewTrialPoint(sampleSet);
             }
 
             sampleSet.insert(sampleSet.end(), candidates.begin(), candidates.end());
@@ -42,13 +58,11 @@ void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, i
             sampleSet.resize(N);
             if (crs3){
 
-               // #pragma omp parallel for num_threads(numOfThreads) shared(candidates, sampleSet)
                 for (int index = 0; index< candidates.size(); index++){
                     if(candidates[index].second <= sampleSet.at(i-1).second){
                         loc();
                     }
                 }
-
             }
             updateLH();
             counter+=numOfThreads;
@@ -289,3 +303,30 @@ void Algorithm::printArray(vector<pair<vector<double>, double> >& a){
     cout << "\b\b]" << '\t' << "f_min = " << L_f << endl;
     cout << "Roznica pomiedzy najlepszym i najgorszym  wynikiem w zbiorze P: " << H_f-L_f << endl;
 }
+
+
+double **Algorithm::getSampleSet(){
+    double *data = (double *)malloc(N*(n+1)*sizeof(double));
+    double **array= (double **)malloc(N*sizeof(double*));
+    for(int i=0; i<N; i++){
+        array[i] = &(data[(n+1)*i]);
+        array[i][0] = sampleSet.at(i).second;
+        for(int j=0; j<n; j++){
+            array[i][j+1] = sampleSet.at(i).first.at(j);
+        }
+    }
+    return array;
+}
+
+vector<pair<vector<double>, double>> Algorithm::setSampleSet(double **localSampleSet){
+    vector<pair<vector<double>, double>> toRet;
+    for(int i=0; i<N; i++){
+        double value = localSampleSet[i][0];
+        vector<double> point;
+        for(int j=0; j<n; j++){
+            point.push_back(localSampleSet[i][j+1]);
+        }
+        toRet.push_back(make_pair(point, value));
+    }
+    return toRet;
+};
