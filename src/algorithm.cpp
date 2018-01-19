@@ -1,35 +1,41 @@
 #include "../include/algorithm.h"
 #include <chrono>
+#include <fstream>
 #include <mpi.h>
 
 using namespace std;
 
+ofstream myfile;
+
 Algorithm::Algorithm(int n)
 {
+    cout << "Algorithm" << endl;
     this->n = n;
     this->N = 10*(n+1);
+    myfile.open ("results1.log", ios::app);
 
 }
 
 Algorithm::~Algorithm()
 {
+    myfile.close();
 }
 
 void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, int numOfThreads)
 {
-    cout<<"1";
+    myfile<<"1";
     using namespace std::chrono;
     high_resolution_clock::time_point start = high_resolution_clock::now();
-    std::cout<<"2";
+    myfile<<"2";
     this->f = f;
     int counter = 0;
-    std::cout<<"3";
+    myfile<<"3";
     initializeSampleSet();
-    std::cout<<"4";
+    myfile<<"4";
     sortSet(sampleSet);
-    std::cout<<"5";
+    myfile<<"5";
     updateLH();
-    std::cout<<"1";
+    myfile<<"1";
     int i = N/10;
     do {
         /* **********************************************************************
@@ -42,7 +48,7 @@ void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, i
             int threadsNum = world_size-1;
             vector<pair<vector<double>, double>> candidates(threadsNum);
             for (int z=1; z< world_size; z++){
-                std::cout << "TESTEES" << &getSampleSet()[0][0];
+                myfile << "TESTEES" << &getSampleSet()[0][0];
                 MPI_Send(&getSampleSet()[0][0] ,N*(n+1), MPI_DOUBLE, z, 0, MPI_COMM_WORLD);
             }
             for(int z=1; z< world_size; z++) {
@@ -51,9 +57,9 @@ void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, i
                 pair<vector<double>, double> newCandidate;
                 newCandidate.second = candidate[0];
                 for (int i = 0; i < n; i++) {
-                    newCandidate.first.at(i) = candidate[i + 1];
+                    newCandidate.first.push_back(candidate[i + 1]);
                 }
-                candidates.at(z - 1) = newCandidate;
+                candidates.push_back(newCandidate);
                 received++;
             }
             while(received < threadsNum){
@@ -103,8 +109,8 @@ void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, i
     high_resolution_clock::time_point end = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>( end - start ).count()/ 1000;
     printArray(sampleSet);
-    cout << "Liczba krokow: " << counter << endl << "Czas trwania: " << duration << "ms" << endl;
-    cout << "*********************************************************" << endl;
+    myfile << "Liczba krokow: " << counter << endl << "Czas trwania: " << duration << "ms" << endl;
+    myfile << "*********************************************************" << endl;
 }
 
 void Algorithm::runCRS3(Exercise* f, bool parallel, double epsilon, int numOfThreads)
@@ -152,13 +158,17 @@ void Algorithm::updateLH(){
     H_f = sampleSet.at(N-1).second;
 }
 
-vector<vector<double>> Algorithm::generateSimplex(){
+vector<vector<double>> Algorithm::generateSimplex(vector<pair<vector<double>, double>> localSampleSet){
+    std::cout<<"generateSimplex" << std::endl;
     vector<vector<double> > simplex;
     vector<int> simplex_indexes;
     for(int i = 0; i<n; i++){
         int newIndex;
         bool nodups = false;
         while(!nodups){
+            for(int k=0; k<i; k++){
+                simplex_indexes.push_back(0);
+            }
             nodups = true;
             newIndex = rand() % (N-1) +1;
             for(int k=0; k<i; k++){
@@ -171,26 +181,40 @@ vector<vector<double>> Algorithm::generateSimplex(){
         simplex_indexes.push_back(newIndex);
     }
     simplex.push_back(L);
+    std::cout<<"generateSimplex push_back" << localSampleSet.size() << std::endl;
     for(int i=1; i<n+1; i++){
-        simplex.push_back(sampleSet.at(simplex_indexes.at(i-1)).first);
+        simplex.push_back(localSampleSet.at(simplex_indexes.at(i-1)).first);
     }
+    std::cout<<"generateSimplex end" << std::endl;
     return simplex;
 }
 
 pair<vector<double>, double> Algorithm::getNewTrialPoint(vector<pair<vector<double>, double> > sampleSet){
-    vector<vector<double> > simplex = generateSimplex();
+    std::cout << "getNewTrialPoint init" << std::endl;
+    vector<vector<double> > simplex = generateSimplex(sampleSet);
+    std::cout << "getNewTrialPoint simplex" << simplex.size() << std::endl;
     vector<double> centroid, newTrial, sum;
     for(int i=0; i<n; i++)
         sum.push_back(0.0);
     double newTrialValue = 0.0;
+    std::cout << "getNewTrialPoint newTrialValue" << std::endl;
+    for (int z=0; z<simplex.size();z++){
+        for (vector<double>::const_iterator i = simplex.at(z).begin(); i != simplex.at(z).end(); ++i){
+            std::cout << *i << ", ";
+        }
+        std::cout << "\n";
+    }
+
     for(int i=0; i<n; i++){
-        for(int j=0; j<n; j++)
+        for(int j=0; j<n; j++) {
             sum.at(i) += simplex.at(j).at(i);
+        }
         centroid.push_back(sum.at(i)/n);
         newTrial.push_back(2*centroid.at(i)-simplex.at(n).at(i));
     }
+    std::cout << "getNewTrialPoint after fors" << std::endl;
     newTrialValue = f->calculate(newTrial);
-
+    std::cout << "getNewTrialPoint2" << std::endl;
     if(!f->checkConstraints(newTrial) || newTrialValue>H_f){
         return getNewTrialPoint(sampleSet);
     }
@@ -304,15 +328,16 @@ void Algorithm::printArray(vector<pair<vector<double>, double> >& a){
             cout << endl;
         }
     }*/
-    cout  << "x_min = [";
+    myfile  << "x_min = [";
     for(int i=0; i<n; i++)
-        cout << L.at(i) << ", ";
-    cout << "\b\b]" << '\t' << "f_min = " << L_f << endl;
-    cout << "Roznica pomiedzy najlepszym i najgorszym  wynikiem w zbiorze P: " << H_f-L_f << endl;
+        myfile << L.at(i) << ", ";
+    myfile << "\b\b]" << '\t' << "f_min = " << L_f << endl;
+    myfile << "Roznica pomiedzy najlepszym i najgorszym  wynikiem w zbiorze P: " << H_f-L_f << endl;
 }
 
 
 double **Algorithm::getSampleSet(){
+    std::cout << "getSampleSet" << std::endl;
     double *data = (double *)malloc(N*(n+1)*sizeof(double));
     double **array= (double **)malloc(N*sizeof(double*));
     for(int i=0; i<N; i++){
@@ -326,6 +351,7 @@ double **Algorithm::getSampleSet(){
 }
 
 vector<pair<vector<double>, double>> Algorithm::setSampleSet(double **localSampleSet){
+    std::cout << "setSampleSet" << std::endl;
     vector<pair<vector<double>, double>> toRet;
     for(int i=0; i<N; i++){
         double value = localSampleSet[i][0];
@@ -335,5 +361,6 @@ vector<pair<vector<double>, double>> Algorithm::setSampleSet(double **localSampl
         }
         toRet.push_back(make_pair(point, value));
     }
+    std::cout << "end setSampleSet" << std::endl;
     return toRet;
 };

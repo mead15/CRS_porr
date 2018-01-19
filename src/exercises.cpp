@@ -5,6 +5,7 @@ using namespace std;
 
 Exercise::Exercise(int n){
     this->n = n;
+    cout << "EXERCISE" << endl;
 }
 
 Exercise::~Exercise() {

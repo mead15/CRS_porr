@@ -37,7 +37,7 @@ class Algorithm
         void updateLH();
         void loc();
         void sortSet(vector<pair<vector<double>, double> >& setToSort);
-        vector<vector<double>> generateSimplex();
+        vector<vector<double>> generateSimplex(vector<pair<vector<double>, double>> localSampleSet);
 
         void printArray(vector<pair<vector<double>, double> >& a);
 };

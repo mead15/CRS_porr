@@ -2,6 +2,7 @@
 #include <ctime>
 #include "include/algorithm.h"
 #include <mpi.h>
+#include <fstream>
 
 using namespace std;
 
@@ -22,7 +23,8 @@ double **alloc_2d(int rows, int cols) {
 int main(int argc, char** argv)
 {
     srand (time(NULL));
-
+    ofstream myfile;
+    myfile.open ("results1.log", ios::app);
     int threadNum = 2;
     MPI_Init(NULL, NULL);
 
@@ -38,35 +40,36 @@ int main(int argc, char** argv)
 
             for (double epsilon: EPSILON) {
 
-                std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
+                myfile << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
                           << std::endl << std::endl;
-                std::cout << "Zadanie 1 " << std::endl;
-                std::cout << "Rownolegle CRS2" << std::endl;
-                std::cout << "Epsilon: " << epsilon << std::endl;
-                std::cout << "Liczba watkow: " << threadNum << endl;
-                std::cout << "n = " << n << std::endl;
+                myfile << "Zadanie 1 " << std::endl;
+                myfile << "Rownolegle CRS2" << std::endl;
+                myfile << "Epsilon: " << epsilon << std::endl;
+                myfile << "Liczba watkow: " << threadNum << endl;
+                myfile << "n = " << n << std::endl;
+                if(1)
                 {
-                    std::cout << "a1" << std::endl;
+                    myfile << "a1" << std::endl;
                     Algorithm *CRS2_f1 = new Algorithm(n);
-                    std::cout << "a2" << std::endl;
+                    myfile << "a2" << std::endl;
 
                     Exercise *f = new Func_1(n);
-                    std::cout << "a3" << std::endl;
+                    myfile << "a3" << std::endl;
 
                     CRS2_f1->runCRS2(f, true, epsilon, false, threadNum);
-                    std::cout << "a4" << std::endl;
+                    myfile << "a4" << std::endl;
 
                     delete CRS2_f1;
                     delete f;
                 }
 
-//                std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
+//                myfile << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
 //                          << std::endl << std::endl;
-//                std::cout << "Zadanie 2" << std::endl;
-//                std::cout << "Rownolegle CRS2" << std::endl;
-//                std::cout << "Epsilon: " << epsilon << std::endl;
-//                std::cout << "Liczba watkow: " << threadNum << endl;
-//                std::cout << "n = " << n << std::endl;
+//                myfile << "Zadanie 2" << std::endl;
+//                myfile << "Rownolegle CRS2" << std::endl;
+//                myfile << "Epsilon: " << epsilon << std::endl;
+//                myfile << "Liczba watkow: " << threadNum << endl;
+//                myfile << "n = " << n << std::endl;
 //                {
 //                    Algorithm *CRS2_f2 = new Algorithm(n);
 //                    Exercise *f = new Func_2(n);
@@ -75,13 +78,14 @@ int main(int argc, char** argv)
 //                    delete f;
 //                }
 
-                std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
+                myfile << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
                           << std::endl << std::endl;
-                std::cout << "Zadanie 1" << std::endl;
-                std::cout << "Rownolegle CRS3" << std::endl;
-                std::cout << "Epsilon: " << epsilon << std::endl;
-                std::cout << "Liczba watkow: " << threadNum << endl;
-                std::cout << "n = " << n << std::endl;
+                myfile << "Zadanie 1" << std::endl;
+                myfile << "Rownolegle CRS3" << std::endl;
+                myfile << "Epsilon: " << epsilon << std::endl;
+                myfile << "Liczba watkow: " << threadNum << endl;
+                myfile << "n = " << n << std::endl;
+                if(1)
                 {
                     Algorithm *CRS3_f1 = new Algorithm(n);
                     Exercise *f = new Func_1(n);
@@ -90,13 +94,13 @@ int main(int argc, char** argv)
                     delete f;
                 }
 
-//                std::cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
+//                myfile << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
 //                          << std::endl << std::endl;
-//                std::cout << "Zadanie 2" << std::endl;
-//                std::cout << "Rownolegle CRS3" << std::endl;
-//                std::cout << "Epsilon: " << epsilon << std::endl;
-//                std::cout << "Liczba watkow: " << threadNum << endl;
-//                std::cout << "n = " << n << std::endl;
+//                myfile << "Zadanie 2" << std::endl;
+//                myfile << "Rownolegle CRS3" << std::endl;
+//                myfile << "Epsilon: " << epsilon << std::endl;
+//                myfile << "Liczba watkow: " << threadNum << endl;
+//                myfile << "n = " << n << std::endl;
 //                {
 //                    Algorithm *CRS3_f2 = new Algorithm(n);
 //                    Exercise *f = new Func_2(n);
@@ -108,24 +112,28 @@ int main(int argc, char** argv)
         } else {
             while (1) {
                 double **sampleSet = alloc_2d(10*(n+1), n+1);
-                std::cout << "adasdadada";
-//                MPI_Recv(&sampleSet[0][0], 10*(n+1)*(n+1), MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                myfile << "adasdadada";
+                MPI_Recv(&sampleSet[0][0], 10*(n+1)*(n+1), MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                 if(sampleSet[0][0]==0){
                     break;
                 }
                 Algorithm *CRS3_f1 = new Algorithm(n);
+                std::cout << " before newCandidate" << std::endl;
                 pair<vector<double>, double> newCandidate = CRS3_f1->getNewTrialPoint(CRS3_f1->setSampleSet(sampleSet));
+                std::cout << "newCandidate" << std::endl;
                 double *candidate = (double *)malloc((n+1)*sizeof(double));
+                std::cout << "newCandidate malloc" << std::endl;
                 candidate[0] = newCandidate.second;
                 for (int i=0; i<n; i++){
                     candidate[i+1] = newCandidate.first.at(i);
                 }
+                std::cout << "newCandidate after malloc" << std::endl;
                 MPI_Send(&candidate[0], (n+1), MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
             }
         }
     }
 
     MPI_Finalize();
-
+    myfile.close();
     return 0;
 }
