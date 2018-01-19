@@ -7,11 +7,12 @@ using namespace std;
 
 ofstream myfile;
 
-Algorithm::Algorithm(int n)
+Algorithm::Algorithm(int n, Exercise* f)
 {
     cout << "Algorithm" << endl;
     this->n = n;
     this->N = 10*(n+1);
+    this->f = f;
     myfile.open ("results1.log", ios::app);
 
 }
@@ -160,7 +161,7 @@ void Algorithm::updateLH(){
 
 vector<vector<double>> Algorithm::generateSimplex(vector<pair<vector<double>, double>> localSampleSet){
     std::cout<<"generateSimplex" << std::endl;
-    vector<vector<double> > simplex;
+    vector<vector<double>> simplex;
     vector<int> simplex_indexes;
     for(int i = 0; i<n; i++){
         int newIndex;
@@ -181,7 +182,6 @@ vector<vector<double>> Algorithm::generateSimplex(vector<pair<vector<double>, do
         simplex_indexes.push_back(newIndex);
     }
     simplex.push_back(L);
-    std::cout<<"generateSimplex push_back" << localSampleSet.size() << std::endl;
     for(int i=1; i<n+1; i++){
         simplex.push_back(localSampleSet.at(simplex_indexes.at(i-1)).first);
     }
@@ -199,19 +199,34 @@ pair<vector<double>, double> Algorithm::getNewTrialPoint(vector<pair<vector<doub
     double newTrialValue = 0.0;
     std::cout << "getNewTrialPoint newTrialValue" << std::endl;
     for (int z=0; z<simplex.size();z++){
+        std::cout << z <<"\n";
         for (vector<double>::const_iterator i = simplex.at(z).begin(); i != simplex.at(z).end(); ++i){
             std::cout << *i << ", ";
         }
         std::cout << "\n";
     }
+    std::cout << "simplex.size() " << simplex.size() << std::endl;
+
+
+    vector< vector<double> >::iterator row;
+    vector<double>::iterator col;
+    int outer_counter, inner_counter = 0;
+    for (row = simplex.begin(); row != simplex.end(); row++) {
+        for (col = row->begin(); col != row->end(); col++) {
+            sum.at(inner_counter) += *col;
+            inner_counter++;
+        }
+        outer_counter++;
+        inner_counter = 0;
+    }
+
+    std::cout << "getNewTrialPoint between fors" << std::endl;
 
     for(int i=0; i<n; i++){
-        for(int j=0; j<n; j++) {
-            sum.at(i) += simplex.at(j).at(i);
-        }
         centroid.push_back(sum.at(i)/n);
         newTrial.push_back(2*centroid.at(i)-simplex.at(n).at(i));
     }
+
     std::cout << "getNewTrialPoint after fors" << std::endl;
     newTrialValue = f->calculate(newTrial);
     std::cout << "getNewTrialPoint2" << std::endl;

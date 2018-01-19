@@ -114,13 +114,15 @@ int main(int argc, char** argv)
                 double **sampleSet = alloc_2d(10*(n+1), n+1);
                 myfile << "adasdadada";
                 MPI_Recv(&sampleSet[0][0], 10*(n+1)*(n+1), MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                cout <<  "MPI_Recv: "<< sampleSet[0][0] << endl;
                 if(sampleSet[0][0]==0){
                     break;
                 }
-                Algorithm *CRS3_f1 = new Algorithm(n);
-                std::cout << " before newCandidate" << std::endl;
+                Exercise *f = new Func_1(n);
+                Algorithm *CRS3_f1 = new Algorithm(n, f);
+                std::cout << "before newCandidate" << std::endl;
                 pair<vector<double>, double> newCandidate = CRS3_f1->getNewTrialPoint(CRS3_f1->setSampleSet(sampleSet));
-                std::cout << "newCandidate" << std::endl;
+                std::cout << "after newCandidate" << std::endl;
                 double *candidate = (double *)malloc((n+1)*sizeof(double));
                 std::cout << "newCandidate malloc" << std::endl;
                 candidate[0] = newCandidate.second;

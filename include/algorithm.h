@@ -14,7 +14,7 @@ using namespace std;
 class Algorithm
 {
     public:
-        Algorithm(int n);
+        Algorithm(int n, Exercise* f=nullptr);
         virtual ~Algorithm();
         void runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, int numOfThreads);
         void runCRS3(Exercise* f, bool parallel, double epsilon, int numOfThreads);
