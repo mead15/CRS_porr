@@ -1,24 +1,19 @@
 #include "../include/algorithm.h"
 #include <chrono>
 #include <fstream>
-#include <mpi.h>
 #include <random>
 
 using namespace std;
-
-ofstream myfile;
 
 Algorithm::Algorithm(int n, Exercise* f)
 {
     this->n = n;
     this->N = 10*(n+1);
     this->f = f;
-    myfile.open ("results1.log", ios::app);
 }
 
 Algorithm::~Algorithm()
 {
-    myfile.close();
 }
 
 void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, int numOfThreads)
@@ -30,13 +25,8 @@ void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, i
     sortSet(sampleSet);
     updateLH();
     int i = N/10;
-    MPI_Init(NULL, NULL);
     srand (time(NULL));
-    int world_size;
-    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-
-    int world_rank;
-    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    int world_size = numOfThreads;
     int counter = 0;
 
     do {
@@ -47,34 +37,25 @@ void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, i
         if (parallel) {
             double localSampleSet[(n+1)*N];
             double candidatesBuffer[world_size*(n+1)*N];
-            if (world_rank == 0){
-                for(int j=0; j<N; j++){
-                    localSampleSet[j*(n+1)] = sampleSet.at(j).second;
-                    vector<double> vec = sampleSet.at(j).first;
-                    for(int i=0; i<n; i++){
-                        localSampleSet[j*(n+1) + i+1] = vec.at(i);
-                    }
-                }
-                for (pair<vector<double>, double> pair1: sampleSet){
-                    for (double value: pair1.first){
-                        cout << value << ", ";
-                    }
-                    cout << endl;
+            for(int j=0; j<N; j++){
+                localSampleSet[j*(n+1)] = sampleSet.at(j).second;
+                vector<double> vec = sampleSet.at(j).first;
+                for(int i=0; i<n; i++){
+                    localSampleSet[j*(n+1) + i+1] = vec.at(i);
                 }
             }
-            MPI_Barrier(MPI_COMM_WORLD);
-            MPI_Bcast(localSampleSet, N*(n+1), MPI_DOUBLE, 0, MPI_COMM_WORLD );
-            MPI_Barrier(MPI_COMM_WORLD);
+            for (pair<vector<double>, double> pair1: sampleSet){
+                for (double value: pair1.first){
+                    cout << value << ", ";
+                }
+                cout << endl;
+            }
             pair<vector<double>, double> newCandidate = getNewTrialPoint(setSampleSet(localSampleSet));
-            double candidate[n+1];
-            candidate[0] = newCandidate.second;
+            candidatesBuffer[0] = newCandidate.second;
             for (int i=0; i<n; i++){
-                candidate[i+1] = newCandidate.first.at(i);
+                candidatesBuffer[i+1] = newCandidate.first.at(i);
             }
-            MPI_Barrier(MPI_COMM_WORLD);
-            MPI_Gather(candidate, n+1, MPI_DOUBLE, candidatesBuffer, n+1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-            MPI_Barrier(MPI_COMM_WORLD);
-            if (world_rank == 0) {
+
                 vector<pair<vector<double>, double>> candidates;
                 for (int z = 0; z < world_size*(n + 1); z += n + 1) {
                     pair<vector<double>, double> newCandidatePoint;
@@ -109,8 +90,6 @@ void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, i
                 updateLH();
                 counter += world_size;
 
-            }
-            MPI_Barrier(MPI_COMM_WORLD);
         }
         /* ***********************************************************************
          * END OF PARALLEL
@@ -136,16 +115,14 @@ void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, i
         /* ***********************************************************************
          * END OF SEQUENCE
          */
-        MPI_Barrier(MPI_COMM_WORLD);
     }
     while(!stop_criterion(epsilon));
-    MPI_Finalize();
     high_resolution_clock::time_point end = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>( end - start ).count()/ 1000;
     printArray(sampleSet);
 
-    myfile << "Liczba krokow: " << counter << endl << "Czas trwania: " << duration << "ms" << endl;
-    myfile << "*********************************************************" << endl;
+    cout << "Liczba krokow: " << counter << endl << "Czas trwania: " << duration << "ms" << endl;
+    cout << "*********************************************************" << endl;
 
 }
 
@@ -363,11 +340,11 @@ void Algorithm::printArray(vector<pair<vector<double>, double> >& a){
             cout << endl;
         }
     }*/
-    myfile  << "x_min = [";
+    cout  << "x_min = [";
     for(int i=0; i<n; i++)
-        myfile << L.at(i) << ", ";
-    myfile << "\b\b]" << '\t' << "f_min = " << L_f << endl;
-    myfile << "Roznica pomiedzy najlepszym i najgorszym  wynikiem w zbiorze P: " << H_f-L_f << endl;
+        cout << L.at(i) << ", ";
+    cout << "\b\b]" << '\t' << "f_min = " << L_f << endl;
+    cout << "Roznica pomiedzy najlepszym i najgorszym  wynikiem w zbiorze P: " << H_f-L_f << endl;
 }
 
 vector<pair<vector<double>, double>> Algorithm::setSampleSet(double localSampleSet[]){

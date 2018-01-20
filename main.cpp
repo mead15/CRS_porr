@@ -12,41 +12,39 @@ static const double EPSILON[4] = {1e-2, 1e-4, 1e-6, 1e-8};
 int main(int argc, char** argv)
 {
     srand (time(NULL));
-    ofstream myfile;
-    myfile.open ("results1.log", ios::app);
     int threadNum = 2;
     double epsilon = EPSILON[1];
 //    for (int n : N_ARRAY) {
     int n = N_ARRAY[0];
-    myfile << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
+    cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
               << std::endl << std::endl;
-    myfile << "Zadanie 1 " << std::endl;
-    myfile << "Rownolegle CRS2" << std::endl;
-    myfile << "Epsilon: " << epsilon << std::endl;
-    myfile << "Liczba watkow: " << threadNum << endl;
-    myfile << "n = " << n << std::endl;
+    cout << "Zadanie 1 " << std::endl;
+    cout << "Rownolegle CRS2" << std::endl;
+    cout << "Epsilon: " << epsilon << std::endl;
+    cout << "Liczba watkow: " << threadNum << endl;
+    cout << "n = " << n << std::endl;
     if(1)
     {
-        myfile << "a1" << std::endl;
+        cout << "a1" << std::endl;
         Algorithm *CRS2_f1 = new Algorithm(n);
-        myfile << "a2" << std::endl;
+        cout << "a2" << std::endl;
 
         Exercise *f = new Func_1(n);
-        myfile << "a3" << std::endl;
+        cout << "a3" << std::endl;
 
         CRS2_f1->runCRS2(f, true, epsilon, false, threadNum);
-        myfile << "a4" << std::endl;
+        cout << "a4" << std::endl;
 
         delete CRS2_f1;
         delete f;
     }
-//                myfile << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
+//                cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
 //                          << std::endl << std::endl;
-//                myfile << "Zadanie 2" << std::endl;
-//                myfile << "Rownolegle CRS2" << std::endl;
-//                myfile << "Epsilon: " << epsilon << std::endl;
-//                myfile << "Liczba watkow: " << threadNum << endl;
-//                myfile << "n = " << n << std::endl;
+//                cout << "Zadanie 2" << std::endl;
+//                cout << "Rownolegle CRS2" << std::endl;
+//                cout << "Epsilon: " << epsilon << std::endl;
+//                cout << "Liczba watkow: " << threadNum << endl;
+//                cout << "n = " << n << std::endl;
 //                {
 //                    Algorithm *CRS2_f2 = new Algorithm(n);
 //                    Exercise *f = new Func_2(n);
@@ -55,13 +53,13 @@ int main(int argc, char** argv)
 //                    delete f;
 //                }
 
-//                myfile << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
+//                cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
 //                          << std::endl << std::endl;
-//                myfile << "Zadanie 1" << std::endl;
-//                myfile << "Rownolegle CRS3" << std::endl;
-//                myfile << "Epsilon: " << epsilon << std::endl;
-//                myfile << "Liczba watkow: " << threadNum << endl;
-//                myfile << "n = " << n << std::endl;
+//                cout << "Zadanie 1" << std::endl;
+//                cout << "Rownolegle CRS3" << std::endl;
+//                cout << "Epsilon: " << epsilon << std::endl;
+//                cout << "Liczba watkow: " << threadNum << endl;
+//                cout << "n = " << n << std::endl;
 //                if(1)
 //                {
 //                    Algorithm *CRS3_f1 = new Algorithm(n);
@@ -71,13 +69,13 @@ int main(int argc, char** argv)
 //                    delete f;
 //                }
 
-//                myfile << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
+//                cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
 //                          << std::endl << std::endl;
-//                myfile << "Zadanie 2" << std::endl;
-//                myfile << "Rownolegle CRS3" << std::endl;
-//                myfile << "Epsilon: " << epsilon << std::endl;
-//                myfile << "Liczba watkow: " << threadNum << endl;
-//                myfile << "n = " << n << std::endl;
+//                cout << "Zadanie 2" << std::endl;
+//                cout << "Rownolegle CRS3" << std::endl;
+//                cout << "Epsilon: " << epsilon << std::endl;
+//                cout << "Liczba watkow: " << threadNum << endl;
+//                cout << "n = " << n << std::endl;
 //                {
 //                    Algorithm *CRS3_f2 = new Algorithm(n);
 //                    Exercise *f = new Func_2(n);
@@ -87,6 +85,5 @@ int main(int argc, char** argv)
 //                }
 
 //    }
-    myfile.close();
     return 0;
 }
