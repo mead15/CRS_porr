@@ -22,7 +22,6 @@ Algorithm::Algorithm(int n, Exercise* f)
     this->N = 10*(n+1);
     this->f = f;
     myfile.open ("results1.log", ios::app);
-
 }
 
 Algorithm::~Algorithm()
@@ -41,20 +40,20 @@ void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, i
     updateLH();
     int i = N/10;
     MPI_Init(NULL, NULL);
-
     int world_size;
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
     int world_rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+
     do {
         /* **********************************************************************
          * PARALLEL Ustawianie w pliku include/constants.h
          */
         if (parallel) {
             double **localSampleSet = alloc_2d(10*(n+1), n+1);
-            double *candidatesBuffer = (double *)malloc(world_size*(n+1)*sizeof(double));
-            vector<pair<vector<double>, double>> candidates(world_size);
+            double *candidatesBuffer = (double *)malloc(1*(n+1)*sizeof(double));
+            vector<pair<vector<double>, double>> candidates;
             if (world_rank == 0){
                 localSampleSet = &(&getSampleSet()[0])[0];
             }
@@ -71,9 +70,8 @@ void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, i
             }
             std::cout << "newCandidate after malloc" << std::endl;
             MPI_Gather(&candidate, n+1, MPI_DOUBLE, candidatesBuffer, n+1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-            if (world_rank == 0){
-                for(int z=0; z< world_size*(n+1); z+=n+1) {
-                    double *candidate;
+            if (world_rank == 0) {
+                for (int z = 0; z < (n + 1); z += n + 1) {
                     pair<vector<double>, double> newCandidate;
                     newCandidate.second = candidatesBuffer[z];
                     for (int i = 0; i < n; i++) {
@@ -81,19 +79,26 @@ void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, i
                     }
                     candidates.push_back(newCandidate);
                 }
+                std::cout << "newCandidate after malloc" << std::endl;
                 sampleSet.insert(sampleSet.end(), candidates.begin(), candidates.end());
-                sortSet(sampleSet);
-                sampleSet.resize(N);
-                if (crs3){
+                std::cout << "newCandidate after malloc" << std::endl;
 
-                    for (int index = 0; index< candidates.size(); index++){
-                        if(candidates[index].second <= sampleSet.at(i-1).second){
+                sortSet(sampleSet);
+                std::cout << "newCandidate after malloc" << std::endl;
+                sampleSet.resize(N);
+                std::cout << "newCandidate after malloc" << std::endl;
+
+                if (crs3) {
+
+                    for (int index = 0; index < candidates.size(); index++) {
+                        if (candidates[index].second <= sampleSet.at(i - 1).second) {
                             loc();
                         }
                     }
                 }
                 updateLH();
-                counter+=numOfThreads;
+                counter += world_rank;
+                std::cout << "newCandidate after malloc5" << std::endl;
             }
             MPI_Barrier(MPI_COMM_WORLD);
 
@@ -124,16 +129,13 @@ void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, i
          */
     }
     while(!stop_criterion(epsilon));
-    for (int z=1; z< world_size; z++){
-        double value = 0;
-        MPI_Send(&value ,N*(n+1), MPI_DOUBLE, z, 0, MPI_COMM_WORLD);
-    }
+    MPI_Finalize();
     high_resolution_clock::time_point end = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>( end - start ).count()/ 1000;
     printArray(sampleSet);
+
     myfile << "Liczba krokow: " << counter << endl << "Czas trwania: " << duration << "ms" << endl;
     myfile << "*********************************************************" << endl;
-    MPI_Finalize();
 
 }
 
@@ -362,8 +364,9 @@ double **Algorithm::getSampleSet(){
     for(int i=0; i<N; i++){
         array[i] = &(data[(n+1)*i]);
         array[i][0] = sampleSet.at(i).second;
+        vector<double> vec = sampleSet.at(i).first;
         for(int j=0; j<n; j++){
-            array[i][j+1] = sampleSet.at(i).first.at(j);
+            array[i][j+1] = vec.at(j);
         }
     }
     return array;
@@ -373,9 +376,9 @@ vector<pair<vector<double>, double>> Algorithm::setSampleSet(double **localSampl
     vector<pair<vector<double>, double>> toRet;
     for(int i=0; i<N; i++){
         double value = localSampleSet[i][0];
-        vector<double> point;
+        vector<double> point(n);
         for(int j=0; j<n; j++){
-            point.push_back(localSampleSet[i][j+1]);
+            point.at(j) = (localSampleSet[i][j+1]);
         }
         toRet.push_back(make_pair(point, value));
     }

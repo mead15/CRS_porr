@@ -15,31 +15,31 @@ int main(int argc, char** argv)
     ofstream myfile;
     myfile.open ("results1.log", ios::app);
     int threadNum = 2;
-    double epsilon = EPSILON[0];
-    for (int n : N_ARRAY) {
+    double epsilon = EPSILON[1];
+//    for (int n : N_ARRAY) {
+    int n = N_ARRAY[0];
+    myfile << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
+              << std::endl << std::endl;
+    myfile << "Zadanie 1 " << std::endl;
+    myfile << "Rownolegle CRS2" << std::endl;
+    myfile << "Epsilon: " << epsilon << std::endl;
+    myfile << "Liczba watkow: " << threadNum << endl;
+    myfile << "n = " << n << std::endl;
+    if(1)
+    {
+        myfile << "a1" << std::endl;
+        Algorithm *CRS2_f1 = new Algorithm(n);
+        myfile << "a2" << std::endl;
 
-            myfile << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
-                      << std::endl << std::endl;
-            myfile << "Zadanie 1 " << std::endl;
-            myfile << "Rownolegle CRS2" << std::endl;
-            myfile << "Epsilon: " << epsilon << std::endl;
-            myfile << "Liczba watkow: " << threadNum << endl;
-            myfile << "n = " << n << std::endl;
-            if(1)
-            {
-                myfile << "a1" << std::endl;
-                Algorithm *CRS2_f1 = new Algorithm(n);
-                myfile << "a2" << std::endl;
+        Exercise *f = new Func_1(n);
+        myfile << "a3" << std::endl;
 
-                Exercise *f = new Func_1(n);
-                myfile << "a3" << std::endl;
+        CRS2_f1->runCRS2(f, true, epsilon, false, threadNum);
+        myfile << "a4" << std::endl;
 
-                CRS2_f1->runCRS2(f, true, epsilon, false, threadNum);
-                myfile << "a4" << std::endl;
-
-                delete CRS2_f1;
-                delete f;
-            }
+        delete CRS2_f1;
+        delete f;
+    }
 //                myfile << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"
 //                          << std::endl << std::endl;
 //                myfile << "Zadanie 2" << std::endl;
@@ -86,7 +86,7 @@ int main(int argc, char** argv)
 //                    delete f;
 //                }
 
-    }
+//    }
     myfile.close();
     return 0;
 }
