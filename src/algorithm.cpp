@@ -41,7 +41,7 @@ void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, i
                 localSampleSet[j*(n+1)] = sampleSet.at(j).second;
                 vector<double> vec = sampleSet.at(j).first;
                 for(int i=0; i<n; i++){
-                    localSampleSet[j*(n+1) + i+1] = vec.at(i);
+                    localSampleSet[j*n+ i+1] = vec.at(i);
                 }
             }
             for (pair<vector<double>, double> pair1: sampleSet){
