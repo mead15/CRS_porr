@@ -2,6 +2,7 @@
 #include <chrono>
 #include <fstream>
 #include <mpi.h>
+#include <random>
 
 using namespace std;
 
@@ -30,6 +31,7 @@ void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, i
     updateLH();
     int i = N/10;
     MPI_Init(NULL, NULL);
+    srand (time(NULL));
     int world_size;
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
@@ -44,30 +46,37 @@ void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, i
         cout << "COUNTER :"<< counter << endl;
         if (parallel) {
             double localSampleSet[(n+1)*N];
-            double candidatesBuffer[world_rank*(n+1)*sizeof(double)];
-            vector<pair<vector<double>, double>> candidates;
+            double candidatesBuffer[world_size*(n+1)*N];
             if (world_rank == 0){
                 for(int j=0; j<N; j++){
                     localSampleSet[j*(n+1)] = sampleSet.at(j).second;
                     vector<double> vec = sampleSet.at(j).first;
                     for(int i=0; i<n; i++){
-                        localSampleSet[j*(n+1) + i+1] = sampleSet.at(i).second;
+                        localSampleSet[j*(n+1) + i+1] = vec.at(i);
                     }
+                }
+                for (pair<vector<double>, double> pair1: sampleSet){
+                    for (double value: pair1.first){
+                        cout << value << ", ";
+                    }
+                    cout << endl;
                 }
             }
             MPI_Barrier(MPI_COMM_WORLD);
             MPI_Bcast(localSampleSet, N*(n+1), MPI_DOUBLE, 0, MPI_COMM_WORLD );
+            MPI_Barrier(MPI_COMM_WORLD);
             pair<vector<double>, double> newCandidate = getNewTrialPoint(setSampleSet(localSampleSet));
             double candidate[n+1];
             candidate[0] = newCandidate.second;
             for (int i=0; i<n; i++){
                 candidate[i+1] = newCandidate.first.at(i);
             }
-            MPI_Gather(candidate, n+1, MPI_DOUBLE, candidatesBuffer, world_size*(n+1), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+            MPI_Barrier(MPI_COMM_WORLD);
+            MPI_Gather(candidate, n+1, MPI_DOUBLE, candidatesBuffer, n+1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
             MPI_Barrier(MPI_COMM_WORLD);
             if (world_rank == 0) {
-                cout << "world_rank" << endl;
-                for (int z = 0; z < world_rank*(n + 1); z += n + 1) {
+                vector<pair<vector<double>, double>> candidates;
+                for (int z = 0; z < world_size*(n + 1); z += n + 1) {
                     pair<vector<double>, double> newCandidatePoint;
                     newCandidatePoint.second = candidatesBuffer[z];
                     for (int i = 0; i < n; i++) {
@@ -75,15 +84,17 @@ void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, i
                     }
                     candidates.push_back(newCandidatePoint);
                 }
-                if (counter > 10){
-                    return;
-                }
-                for (pair<vector<double>, double> para: sampleSet){
-                    for (double a: para.first){
-                        cout << a << ", ";
-                    }
-                    cout << endl;
-                }
+//                if (counter > 100){
+//                    return;
+//                }
+//                for (pair<vector<double>, double> pair1: sampleSet){
+//                    for (double value: pair1.first){
+//                        cout << value << ", ";
+//                    }
+//                    cout << endl;
+//
+//                }
+//                cout << endl;cout << endl;cout << endl;
                 sampleSet.insert(sampleSet.end(), candidates.begin(), candidates.end());
                 sortSet(sampleSet);
                 sampleSet.resize(N);
@@ -97,7 +108,9 @@ void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, i
                 }
                 updateLH();
                 counter += world_size;
+
             }
+            MPI_Barrier(MPI_COMM_WORLD);
         }
         /* ***********************************************************************
          * END OF PARALLEL
@@ -123,6 +136,7 @@ void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, i
         /* ***********************************************************************
          * END OF SEQUENCE
          */
+        MPI_Barrier(MPI_COMM_WORLD);
     }
     while(!stop_criterion(epsilon));
     MPI_Finalize();
@@ -181,6 +195,9 @@ void Algorithm::updateLH(){
 }
 
 vector<vector<double>> Algorithm::generateSimplex(vector<pair<vector<double>, double>> localSampleSet){
+    std::random_device rd;
+    std::mt19937 mt(rd());
+    std::uniform_int_distribution<int> dist(0, 1000);
     vector<vector<double>> simplex;
     vector<int> simplex_indexes;
     for(int i = 0; i<n; i++){
@@ -191,7 +208,7 @@ vector<vector<double>> Algorithm::generateSimplex(vector<pair<vector<double>, do
                 simplex_indexes.push_back(0);
             }
             nodups = true;
-            newIndex = rand() % (N-1) +1;
+            newIndex = dist(mt) % (N-1) +1;
             for(int k=0; k<i; k++){
                 if(simplex_indexes.at(k) == newIndex){
                     nodups = false;
