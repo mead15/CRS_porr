@@ -18,8 +18,7 @@ class Algorithm
         virtual ~Algorithm();
         void runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, int numOfThreads);
         void runCRS3(Exercise* f, bool parallel, double epsilon, int numOfThreads);
-        double **getSampleSet();
-        vector<pair<vector<double>, double>> setSampleSet(double **localSampleSet);
+        vector<pair<vector<double>, double>> setSampleSet(double *localSampleSet);
         pair<vector<double>, double> getNewTrialPoint(vector<pair<vector<double>, double> > localSampleSet);
 
     protected:

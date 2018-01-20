@@ -7,15 +7,6 @@ using namespace std;
 
 ofstream myfile;
 
-double **alloc_2d(int rows, int cols) {
-    double *data = (double *)malloc(rows*cols*sizeof(double));
-    double **array= (double **)malloc(rows*sizeof(double*));
-    for (int i=0; i<rows; i++)
-        array[i] = &(data[cols*i]);
-
-    return array;
-}
-
 Algorithm::Algorithm(int n, Exercise* f)
 {
     this->n = n;
@@ -34,7 +25,6 @@ void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, i
     using namespace std::chrono;
     high_resolution_clock::time_point start = high_resolution_clock::now();
     this->f = f;
-    int counter = 0;
     initializeSampleSet();
     sortSet(sampleSet);
     updateLH();
@@ -45,51 +35,60 @@ void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, i
 
     int world_rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    int counter = 0;
 
     do {
         /* **********************************************************************
          * PARALLEL Ustawianie w pliku include/constants.h
          */
+        cout << "COUNTER :"<< counter << endl;
         if (parallel) {
-            double **localSampleSet = alloc_2d(10*(n+1), n+1);
-            double *candidatesBuffer = (double *)malloc(1*(n+1)*sizeof(double));
+            double localSampleSet[(n+1)*N];
+            double candidatesBuffer[world_rank*(n+1)*sizeof(double)];
             vector<pair<vector<double>, double>> candidates;
             if (world_rank == 0){
-                localSampleSet = &(&getSampleSet()[0])[0];
+                for(int j=0; j<N; j++){
+                    localSampleSet[j*(n+1)] = sampleSet.at(j).second;
+                    vector<double> vec = sampleSet.at(j).first;
+                    for(int i=0; i<n; i++){
+                        localSampleSet[j*(n+1) + i+1] = sampleSet.at(i).second;
+                    }
+                }
             }
             MPI_Barrier(MPI_COMM_WORLD);
-            MPI_Bcast(&localSampleSet, N*(n+1), MPI_DOUBLE, 0, MPI_COMM_WORLD );
-
+            MPI_Bcast(localSampleSet, N*(n+1), MPI_DOUBLE, 0, MPI_COMM_WORLD );
             pair<vector<double>, double> newCandidate = getNewTrialPoint(setSampleSet(localSampleSet));
-            std::cout << "after newCandidate" << std::endl;
-            double *candidate = (double *)malloc((n+1)*sizeof(double));
-            std::cout << "newCandidate malloc" << std::endl;
+            double candidate[n+1];
             candidate[0] = newCandidate.second;
             for (int i=0; i<n; i++){
                 candidate[i+1] = newCandidate.first.at(i);
             }
-            std::cout << "newCandidate after malloc" << std::endl;
-            MPI_Gather(&candidate, n+1, MPI_DOUBLE, candidatesBuffer, n+1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+            MPI_Gather(candidate, n+1, MPI_DOUBLE, candidatesBuffer, world_size*(n+1), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+            MPI_Barrier(MPI_COMM_WORLD);
             if (world_rank == 0) {
-                for (int z = 0; z < (n + 1); z += n + 1) {
-                    pair<vector<double>, double> newCandidate;
-                    newCandidate.second = candidatesBuffer[z];
+                cout << "world_rank" << endl;
+                for (int z = 0; z < world_rank*(n + 1); z += n + 1) {
+                    pair<vector<double>, double> newCandidatePoint;
+                    newCandidatePoint.second = candidatesBuffer[z];
                     for (int i = 0; i < n; i++) {
-                        newCandidate.first.push_back(candidatesBuffer[z + i + 1]);
+                        newCandidatePoint.first.push_back(candidatesBuffer[z + i + 1]);
                     }
-                    candidates.push_back(newCandidate);
+                    candidates.push_back(newCandidatePoint);
                 }
-                std::cout << "newCandidate after malloc" << std::endl;
+                if (counter > 10){
+                    return;
+                }
+                for (pair<vector<double>, double> para: sampleSet){
+                    for (double a: para.first){
+                        cout << a << ", ";
+                    }
+                    cout << endl;
+                }
                 sampleSet.insert(sampleSet.end(), candidates.begin(), candidates.end());
-                std::cout << "newCandidate after malloc" << std::endl;
-
                 sortSet(sampleSet);
-                std::cout << "newCandidate after malloc" << std::endl;
                 sampleSet.resize(N);
-                std::cout << "newCandidate after malloc" << std::endl;
 
                 if (crs3) {
-
                     for (int index = 0; index < candidates.size(); index++) {
                         if (candidates[index].second <= sampleSet.at(i - 1).second) {
                             loc();
@@ -97,11 +96,8 @@ void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, i
                     }
                 }
                 updateLH();
-                counter += world_rank;
-                std::cout << "newCandidate after malloc5" << std::endl;
+                counter += world_size;
             }
-            MPI_Barrier(MPI_COMM_WORLD);
-
         }
         /* ***********************************************************************
          * END OF PARALLEL
@@ -141,7 +137,7 @@ void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, i
 
 void Algorithm::runCRS3(Exercise* f, bool parallel, double epsilon, int numOfThreads)
 {
-//    this->CRS3 = true;
+    this->CRS3 = true;
     runCRS2(f, parallel, epsilon, true, numOfThreads);
 }
 
@@ -357,28 +353,13 @@ void Algorithm::printArray(vector<pair<vector<double>, double> >& a){
     myfile << "Roznica pomiedzy najlepszym i najgorszym  wynikiem w zbiorze P: " << H_f-L_f << endl;
 }
 
-
-double **Algorithm::getSampleSet(){
-    double *data = (double *)malloc(N*(n+1)*sizeof(double));
-    double **array= (double **)malloc(N*sizeof(double*));
-    for(int i=0; i<N; i++){
-        array[i] = &(data[(n+1)*i]);
-        array[i][0] = sampleSet.at(i).second;
-        vector<double> vec = sampleSet.at(i).first;
-        for(int j=0; j<n; j++){
-            array[i][j+1] = vec.at(j);
-        }
-    }
-    return array;
-}
-
-vector<pair<vector<double>, double>> Algorithm::setSampleSet(double **localSampleSet){
+vector<pair<vector<double>, double>> Algorithm::setSampleSet(double localSampleSet[]){
     vector<pair<vector<double>, double>> toRet;
     for(int i=0; i<N; i++){
-        double value = localSampleSet[i][0];
+        double value = localSampleSet[i*(n+1)];
         vector<double> point(n);
         for(int j=0; j<n; j++){
-            point.at(j) = (localSampleSet[i][j+1]);
+            point.at(j) = localSampleSet[i*(n+1)+j+1];
         }
         toRet.push_back(make_pair(point, value));
     }
