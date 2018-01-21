@@ -36,12 +36,13 @@ void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, i
         cout << "COUNTER :"<< counter << endl;
         if (parallel) {
             double localSampleSet[(n+1)*N];
-            double candidatesBuffer[world_size*(n+1)*N];
+//            double candidatesBuffer[world_size*(n+1)*N];
+            double candidatesBuffer[world_size*(n+1)];
             for(int j=0; j<N; j++){
                 localSampleSet[j*(n+1)] = sampleSet.at(j).second;
                 vector<double> vec = sampleSet.at(j).first;
                 for(int i=0; i<n; i++){
-                    localSampleSet[j*n+ i+1] = vec.at(i);
+                    localSampleSet[j*(n+1)+ i+1] = vec.at(i);
                 }
             }
             for (pair<vector<double>, double> pair1: sampleSet){
@@ -171,19 +172,23 @@ void Algorithm::updateLH(){
     H_f = sampleSet.at(N-1).second;
 }
 
+
+
 vector<vector<double>> Algorithm::generateSimplex(vector<pair<vector<double>, double>> localSampleSet){
     std::random_device rd;
     std::mt19937 mt(rd());
     std::uniform_int_distribution<int> dist(0, 1000);
     vector<vector<double>> simplex;
     vector<int> simplex_indexes;
+    vector<double> loc_L = localSampleSet.at(0).first;
+
     for(int i = 0; i<n; i++){
         int newIndex;
         bool nodups = false;
         while(!nodups){
-            for(int k=0; k<i; k++){
-                simplex_indexes.push_back(0);
-            }
+//            for(int k=0; k<i; k++){
+//                simplex_indexes.push_back(0);
+//            }
             nodups = true;
             newIndex = dist(mt) % (N-1) +1;
             for(int k=0; k<i; k++){
@@ -195,7 +200,7 @@ vector<vector<double>> Algorithm::generateSimplex(vector<pair<vector<double>, do
         }
         simplex_indexes.push_back(newIndex);
     }
-    simplex.push_back(L);
+    simplex.push_back(loc_L);
     for(int i=1; i<n+1; i++){
         simplex.push_back(localSampleSet.at(simplex_indexes.at(i-1)).first);
     }
@@ -205,29 +210,40 @@ vector<vector<double>> Algorithm::generateSimplex(vector<pair<vector<double>, do
 pair<vector<double>, double> Algorithm::getNewTrialPoint(vector<pair<vector<double>, double> > sampleSet){
     vector<vector<double> > simplex = generateSimplex(sampleSet);
     vector<double> centroid, newTrial, sum;
+    double loc_H_f = sampleSet.at(N-1).second;
     for(int i=0; i<n; i++)
         sum.push_back(0.0);
     double newTrialValue = 0.0;
 
-    vector< vector<double> >::iterator row;
-    vector<double>::iterator col;
-    int outer_counter, inner_counter = 0;
-    for (row = simplex.begin(); row != simplex.end(); row++) {
-        for (col = row->begin(); col != row->end(); col++) {
-            sum.at(inner_counter) += *col;
-            inner_counter++;
-        }
-        outer_counter++;
-        inner_counter = 0;
-    }
-
     for(int i=0; i<n; i++){
+        for(int j=0; j<n; j++)
+            sum.at(i) += simplex.at(j).at(i);
         centroid.push_back(sum.at(i)/n);
         newTrial.push_back(2*centroid.at(i)-simplex.at(n).at(i));
     }
 
+
+
+//    vector< vector<double> >::iterator row;
+//    vector<double>::iterator col;
+//    int outer_counter=0, inner_counter = 0;
+//    for (row = simplex.begin(); row != simplex.end(); row++) {
+//        for (col = row->begin(); col != row->end(); col++) {
+//            sum.at(inner_counter) += *col;
+//            inner_counter++;
+//        }
+//        outer_counter++;
+//        inner_counter = 0;
+//    }
+//
+//
+//    for(int i=0; i<n; i++){
+//        centroid.push_back(sum.at(i)/n);
+//        newTrial.push_back(2*centroid.at(i)-simplex.at(n).at(i));
+//    }
+
     newTrialValue = f->calculate(newTrial);
-    if(!f->checkConstraints(newTrial) || newTrialValue>H_f){
+    if(!f->checkConstraints(newTrial) || newTrialValue>loc_H_f){
         return getNewTrialPoint(sampleSet);
     }
     else{

@@ -12,7 +12,7 @@ static const double EPSILON[4] = {1e-2, 1e-4, 1e-6, 1e-8};
 int main(int argc, char** argv)
 {
     srand (time(NULL));
-    int threadNum = 2;
+    int threadNum = 1;
     double epsilon = EPSILON[1];
 //    for (int n : N_ARRAY) {
     int n = N_ARRAY[0];
