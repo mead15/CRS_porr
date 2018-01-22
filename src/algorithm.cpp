@@ -48,7 +48,8 @@ void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, i
                     localSampleSet[j*(n+1)+ i+1] = vec.at(i);
                 }
             }
-
+            MPI_Bcast(localSampleSet, N*(n+1), MPI_DOUBLE, 0, MPI_COMM_WORLD );
+            MPI_Barrier(MPI_COMM_WORLD);
             pair<vector<double>, double> newCandidate = getNewTrialPoint(setSampleSet(localSampleSet));
             double candidate[n+1];
             candidate[0] = newCandidate.second;
