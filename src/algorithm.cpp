@@ -1,7 +1,7 @@
 #include "../include/algorithm.h"
 #include <chrono>
 #include <fstream>
-#include <random>
+#include <mpi.h>
 
 using namespace std;
 
@@ -25,18 +25,21 @@ void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, i
     sortSet(sampleSet);
     updateLH();
     int i = N/10;
+    MPI_Init(NULL, NULL);
+    int world_size;
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+
+    int world_rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
     srand (time(NULL));
-    int world_size = numOfThreads;
     int counter = 0;
 
     do {
         /* **********************************************************************
          * PARALLEL Ustawianie w pliku include/constants.h
          */
-        cout << "COUNTER :"<< counter << endl;
         if (parallel) {
             double localSampleSet[(n+1)*N];
-//            double candidatesBuffer[world_size*(n+1)*N];
             double candidatesBuffer[world_size*(n+1)];
             for(int j=0; j<N; j++){
                 localSampleSet[j*(n+1)] = sampleSet.at(j).second;
@@ -45,20 +48,19 @@ void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, i
                     localSampleSet[j*(n+1)+ i+1] = vec.at(i);
                 }
             }
-            for (pair<vector<double>, double> pair1: sampleSet){
-                for (double value: pair1.first){
-                    cout << value << ", ";
-                }
-                cout << endl;
-            }
-            pair<vector<double>, double> newCandidate = getNewTrialPoint(setSampleSet(localSampleSet));
-            candidatesBuffer[0] = newCandidate.second;
-            for (int i=0; i<n; i++){
-                candidatesBuffer[i+1] = newCandidate.first.at(i);
-            }
 
+            pair<vector<double>, double> newCandidate = getNewTrialPoint(setSampleSet(localSampleSet));
+            double candidate[n+1];
+            candidate[0] = newCandidate.second;
+            for (int i=0; i<n; i++){
+                candidate[i+1] = newCandidate.first.at(i);
+            }
+            MPI_Barrier(MPI_COMM_WORLD);
+            MPI_Gather(candidate, n+1, MPI_DOUBLE, candidatesBuffer, n+1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+            MPI_Barrier(MPI_COMM_WORLD);
+            if (world_rank == 0) {
                 vector<pair<vector<double>, double>> candidates;
-                for (int z = 0; z < world_size*(n + 1); z += n + 1) {
+                for (int z = 0; z < world_size * (n + 1); z += n + 1) {
                     pair<vector<double>, double> newCandidatePoint;
                     newCandidatePoint.second = candidatesBuffer[z];
                     for (int i = 0; i < n; i++) {
@@ -90,6 +92,8 @@ void Algorithm::runCRS2(Exercise* f, bool parallel, double epsilon, bool crs3, i
                 }
                 updateLH();
                 counter += world_size;
+            }
+            MPI_Barrier(MPI_COMM_WORLD);
 
         }
         /* ***********************************************************************
